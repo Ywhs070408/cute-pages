@@ -59,12 +59,12 @@
   .rabbit-svg{width:200px;height:240px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.12))}
 
   /* ear animations */
-  #earLeft{transform-origin:80px 60px;animation:earWiggleL 2.5s ease-in-out infinite}
+  #earLeft{transform-origin:85px 75px;animation:earWiggleL 2.5s ease-in-out infinite}
   @keyframes earWiggleL{
     0%,100%{transform:rotate(0)}
     50%{transform:rotate(-8deg)}
   }
-  #earRight{transform-origin:120px 60px;animation:earWiggleR 2.5s ease-in-out infinite}
+  #earRight{transform-origin:135px 75px;animation:earWiggleR 2.5s ease-in-out infinite}
   @keyframes earWiggleR{
     0%,100%{transform:rotate(0)}
     50%{transform:rotate(8deg)}
@@ -75,7 +75,7 @@
   @keyframes earFastR{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-10deg)}}
 
   /* tail wag */
-  #rabbitTail{transform-origin:148px 165px;animation:tailWag 1.8s ease-in-out infinite}
+  #rabbitTail{transform-origin:155px 175px;animation:tailWag 1.8s ease-in-out infinite}
   @keyframes tailWag{
     0%,100%{transform:rotate(-12deg)}
     50%{transform:rotate(15deg)}
@@ -152,80 +152,94 @@
 <div class="subtitle">🐰 点点小兔告诉老婆你想她啦～</div>
 
 <div class="rabbit-container" id="rabbitContainer" onclick="petRabbit()">
-  <svg class="rabbit-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-    <!-- ears -->
+  <svg class="rabbit-svg" viewBox="0 0 220 250" xmlns="http://www.w3.org/2000/svg">
+    <!-- soft halo glow -->
+    <defs>
+      <radialGradient id="bodyGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fef3c7"/>
+        <stop offset="60%" stop-color="#fde68a"/>
+        <stop offset="100%" stop-color="#fbbf24"/>
+      </radialGradient>
+      <radialGradient id="earInnerGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fbcfe8"/>
+        <stop offset="100%" stop-color="#f9a8d4"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ears (small triangle-ish) -->
     <g id="earLeft">
-      <ellipse cx="78" cy="35" rx="13" ry="38" fill="#fce7f3" stroke="#f9a8d4" stroke-width="2"/>
-      <ellipse cx="78" cy="38" rx="7" ry="28" fill="#fbcfe8"/>
+      <ellipse cx="85" cy="50" rx="14" ry="28" fill="url(#bodyGrad)" stroke="#d97706" stroke-width="1.5" opacity=".9"/>
+      <ellipse cx="85" cy="56" rx="7" ry="18" fill="url(#earInnerGrad)"/>
     </g>
     <g id="earRight">
-      <ellipse cx="122" cy="35" rx="13" ry="38" fill="#fce7f3" stroke="#f9a8d4" stroke-width="2"/>
-      <ellipse cx="122" cy="38" rx="7" ry="28" fill="#fbcfe8"/>
+      <ellipse cx="135" cy="50" rx="14" ry="28" fill="url(#bodyGrad)" stroke="#d97706" stroke-width="1.5" opacity=".9"/>
+      <ellipse cx="135" cy="56" rx="7" ry="18" fill="url(#earInnerGrad)"/>
     </g>
 
-    <!-- head -->
-    <circle cx="100" cy="100" r="48" fill="#fff"/>
-    <circle cx="100" cy="100" r="48" fill="#fce7f3" opacity=".3"/>
-
-    <!-- body -->
-    <ellipse cx="100" cy="170" rx="42" ry="38" fill="#fff"/>
-    <ellipse cx="100" cy="172" rx="32" ry="28" fill="#fce7f3" opacity=".3"/>
-
-    <!-- feet -->
-    <ellipse cx="78" cy="200" rx="13" ry="8" fill="#fbcfe8"/>
-    <ellipse cx="122" cy="200" rx="13" ry="8" fill="#fbcfe8"/>
-
-    <!-- arms -->
-    <ellipse cx="65" cy="160" rx="10" ry="15" fill="#fbcfe8" transform="rotate(-15 65 160)"/>
-    <ellipse cx="135" cy="160" rx="10" ry="15" fill="#fbcfe8" transform="rotate(15 135 160)"/>
-
-    <!-- tail (pom-pom) -->
+    <!-- tail (small pom behind) -->
     <g id="rabbitTail">
-      <circle cx="148" cy="165" r="14" fill="#fff"/>
-      <circle cx="145" cy="162" r="5" fill="#fce7f3" opacity=".5"/>
-      <circle cx="151" cy="168" r="3" fill="#fce7f3" opacity=".4"/>
+      <circle cx="155" cy="180" r="13" fill="url(#bodyGrad)" stroke="#d97706" stroke-width="1"/>
+      <circle cx="152" cy="177" r="4" fill="#fef3c7" opacity=".6"/>
     </g>
 
-    <!-- face area -->
-    <!-- blush -->
-    <ellipse cx="75" cy="115" rx="9" ry="6" fill="#fb7185" opacity=".4"/>
-    <ellipse cx="125" cy="115" rx="9" ry="6" fill="#fb7185" opacity=".4"/>
+    <!-- big round body -->
+    <ellipse cx="110" cy="180" rx="68" ry="55" fill="url(#bodyGrad)" stroke="#d97706" stroke-width="1.5"/>
 
-    <!-- eyes normal -->
+    <!-- head (round, big) -->
+    <circle cx="110" cy="115" r="52" fill="url(#bodyGrad)" stroke="#d97706" stroke-width="1.5"/>
+
+    <!-- body texture lines (subtle fur) -->
+    <path d="M85 165 Q90 170 88 178" stroke="#d97706" stroke-width="1" fill="none" opacity=".3"/>
+    <path d="M130 165 Q125 170 127 178" stroke="#d97706" stroke-width="1" fill="none" opacity=".3"/>
+    <path d="M110 175 Q105 180 108 195" stroke="#d97706" stroke-width="1" fill="none" opacity=".25"/>
+
+    <!-- blue striped scarf -->
+    <g id="scarf">
+      <!-- scarf main wrap -->
+      <path d="M70 145 Q110 165 150 145 L150 162 Q110 182 70 162 Z" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+      <!-- scarf stripes -->
+      <path d="M82 152 Q110 168 138 152" stroke="#3b82f6" stroke-width="1" fill="none" opacity=".5"/>
+      <path d="M78 158 Q110 175 142 158" stroke="#3b82f6" stroke-width="1" fill="none" opacity=".5"/>
+      <!-- bow knot -->
+      <ellipse cx="110" cy="170" rx="8" ry="6" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.2"/>
+      <!-- bow tails -->
+      <path d="M105 172 Q95 195 88 200 Q92 198 100 192 Q108 185 110 175" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.2"/>
+      <path d="M115 172 Q125 195 132 200 Q128 198 120 192 Q112 185 110 175" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.2"/>
+    </g>
+
+    <!-- eyes (small black) -->
     <g id="eyesNormal">
-      <ellipse cx="83" cy="100" rx="6" ry="8" fill="#1f2937"/>
-      <ellipse cx="117" cy="100" rx="6" ry="8" fill="#1f2937"/>
-      <circle cx="85" cy="97" r="2.5" fill="#fff"/>
-      <circle cx="119" cy="97" r="2.5" fill="#fff"/>
+      <ellipse cx="92" cy="115" rx="4" ry="5" fill="#1f2937"/>
+      <ellipse cx="128" cy="115" rx="4" ry="5" fill="#1f2937"/>
+      <circle cx="93.5" cy="113" r="1.5" fill="#fff"/>
+      <circle cx="129.5" cy="113" r="1.5" fill="#fff"/>
     </g>
-    <!-- eyes happy -->
+    <!-- happy eyes (^_^) -->
     <g id="eyesHappy" style="display:none">
-      <path d="M77 101 Q83 94 89 101" stroke="#1f2937" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      <path d="M111 101 Q117 94 123 101" stroke="#1f2937" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M86 116 Q92 109 98 116" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M122 116 Q128 109 134 116" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
     </g>
 
-    <!-- nose -->
-    <path d="M96 112 L104 112 L100 117 Z" fill="#ec4899"/>
+    <!-- nose (small triangle) -->
+    <path d="M107 128 L113 128 L110 132 Z" fill="#9d174d"/>
 
-    <!-- mouth normal -->
-    <path id="mouthNormal" d="M100 117 Q95 122 90 120 M100 117 Q105 122 110 120" stroke="#9d174d" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <!-- mouth happy -->
-    <path id="mouthHappy" d="M92 118 Q100 128 108 118 Q104 124 100 124 Q96 124 92 118" fill="#fb7185" stroke="#9d174d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"/>
+    <!-- mouth (small) -->
+    <path id="mouthNormal" d="M110 132 Q107 135 104 134 M110 132 Q113 135 116 134" stroke="#9d174d" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- happy mouth (open with tongue) -->
+    <path id="mouthHappy" d="M104 132 Q110 142 116 132 Q114 138 110 138 Q106 138 104 132" fill="#fb7185" stroke="#9d174d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"/>
 
-    <!-- whiskers -->
-    <line x1="62" y1="110" x2="42" y2="106" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="62" y1="116" x2="42" y2="118" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="138" y1="110" x2="158" y2="106" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="138" y1="116" x2="158" y2="118" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- whiskers (subtle) -->
+    <line x1="65" y1="130" x2="40" y2="128" stroke="#9d174d" stroke-width="1" stroke-linecap="round" opacity=".6"/>
+    <line x1="65" y1="135" x2="40" y2="138" stroke="#9d174d" stroke-width="1" stroke-linecap="round" opacity=".6"/>
+    <line x1="155" y1="130" x2="180" y2="128" stroke="#9d174d" stroke-width="1" stroke-linecap="round" opacity=".6"/>
+    <line x1="155" y1="135" x2="180" y2="138" stroke="#9d174d" stroke-width="1" stroke-linecap="round" opacity=".6"/>
 
-    <!-- bow on head -->
-    <path d="M100 68 L88 60 L88 76 Z" fill="#ec4899"/>
-    <path d="M100 68 L112 60 L112 76 Z" fill="#ec4899"/>
-    <circle cx="100" cy="68" r="5" fill="#be185d"/>
-    <circle cx="100" cy="68" r="2" fill="#fbcfe8"/>
+    <!-- blush -->
+    <ellipse cx="78" cy="128" rx="8" ry="5" fill="#fb7185" opacity=".4"/>
+    <ellipse cx="142" cy="128" rx="8" ry="5" fill="#fb7185" opacity=".4"/>
 
-    <!-- flower on body -->
-    <text x="95" y="175" font-size="14">🌸</text>
+    <!-- little tongue (when happy) -->
+    <ellipse id="tongue" cx="110" cy="135" rx="3" ry="2" fill="#fb7185" style="display:none"/>
   </svg>
 </div>
 
@@ -286,6 +300,7 @@ function makeHappy(){
   document.getElementById('eyesHappy').style.display='';
   document.getElementById('mouthNormal').style.display='none';
   document.getElementById('mouthHappy').style.display='';
+  document.getElementById('tongue').style.display='';
   clearTimeout(happyTimer);
   happyTimer=setTimeout(()=>{
     rabbit.classList.remove('happy');
@@ -297,6 +312,7 @@ function resetFace(){
   document.getElementById('eyesHappy').style.display='none';
   document.getElementById('mouthNormal').style.display='';
   document.getElementById('mouthHappy').style.display='none';
+  document.getElementById('tongue').style.display='none';
 }
 
 function createSparkles(){
