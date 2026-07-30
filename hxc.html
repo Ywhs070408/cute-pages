@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="胡欣纯打瓦记录">
+<title>胡欣纯打瓦记录 🦉</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{overflow-x:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 50%,#312e81 100%);
+    color:#e2e8f0;font-size:15px;line-height:1.5;min-height:100vh;
+  }
+
+  .topbar{
+    display:flex;align-items:center;gap:10px;padding:14px 18px;
+    background:rgba(15,23,42,.8);border-bottom:1px solid #334155;
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+  }
+  .topbar .icon{font-size:26px}
+  .topbar h1{font-size:18px;font-weight:800;flex:1;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .topbar .date{font-size:12px;color:#94a3b8}
+
+  .container{padding:16px;max-width:600px;margin:0 auto;padding-bottom:60px}
+
+  /* Big record button */
+  .record-section{
+    text-align:center;padding:30px 20px;margin-bottom:16px;
+    background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(244,114,182,.15));
+    border-radius:24px;border:1px solid #4c1d95;
+  }
+  .record-section .owl{font-size:60px;margin-bottom:8px;animation:owlBounce 2s ease infinite}
+  @keyframes owlBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .record-section .now-time{font-size:32px;font-weight:900;color:#fff;margin-bottom:6px;font-variant-numeric:tabular-nums}
+  .record-section .now-label{font-size:13px;color:#a78bfa;margin-bottom:16px}
+  .record-btn{
+    background:linear-gradient(135deg,#a78bfa,#f472b6);
+    color:#fff;border:none;padding:18px 48px;border-radius:30px;
+    font-size:20px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 24px rgba(167,139,250,.4);transition:.2s;
+    font-family:inherit;letter-spacing:1px;
+  }
+  .record-btn:active{transform:scale(.95)}
+  .record-btn .pulse{display:inline-block;animation:pulse 1.5s ease infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+  /* Stat cards */
+  .card{
+    background:rgba(30,27,75,.6);border-radius:20px;padding:18px;
+    margin-bottom:14px;border:1px solid #4c1d95;
+  }
+  .card-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .card-title .ico{font-size:18px}
+
+  .stat-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  .stat-box{
+    background:rgba(15,23,42,.6);border-radius:16px;padding:16px;
+    border-left:4px solid;
+  }
+  .stat-box.history{border-color:#ef4444}
+  .stat-box.month{border-color:#f59e0b}
+  .stat-box.week{border-color:#22c55e}
+  .stat-box .label{font-size:13px;color:#94a3b8;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+  .stat-box .time{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+  .stat-box.history .time{color:#ef4444}
+  .stat-box.month .time{color:#f59e0b}
+  .stat-box.week .time{color:#22c55e}
+  .stat-box .date{font-size:12px;color:#64748b;margin-top:4px}
+  .stat-box .quote{
+    margin-top:10px;padding:10px 12px;border-radius:10px;
+    font-size:13px;line-height:1.5;font-style:italic;
+  }
+  .stat-box.history .quote{background:rgba(239,68,68,.1);color:#fca5a5}
+  .stat-box.month .quote{background:rgba(245,158,11,.1);color:#fcd34d}
+  .stat-box.week .quote{background:rgba(34,197,94,.1);color:#86efac}
+
+  /* Chart */
+  .chart-card{background:rgba(30,27,75,.6);border-radius:20px;padding:18px;margin-bottom:14px;border:1px solid #4c1d95}
+  .chart-card h3{font-size:15px;font-weight:700;margin-bottom:14px;color:#a78bfa}
+
+  /* Recent list */
+  .record-item{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;
+    background:rgba(15,23,42,.5);border-radius:14px;margin-bottom:8px;
+    border-left:3px solid #4c1d95;
+  }
+  .record-item.peak{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
+  .record-item .r-time{font-size:20px;font-weight:800;color:#e2e8f0;font-variant-numeric:tabular-nums}
+  .record-item .r-date{font-size:12px;color:#64748b;flex:1}
+  .record-item .r-tag{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:700}
+  .record-item .r-tag.late{background:rgba(239,68,68,.2);color:#fca5a5}
+  .record-item .r-tag.early{background:rgba(34,197,94,.2);color:#86efac}
+  .record-item .r-tag.normal{background:rgba(167,139,250,.2);color:#c4b5fd}
+  .record-item .del{color:#64748b;cursor:pointer;font-size:16px;padding:4px}
+
+  .section-title{
+    font-size:16px;font-weight:800;color:#a78bfa;margin:20px 0 10px;
+    display:flex;align-items:center;gap:6px;
+  }
+
+  .empty{text-align:center;padding:30px;color:#64748b;font-size:14px}
+  .empty .emoji{font-size:40px;margin-bottom:8px}
+
+  /* Summary */
+  .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .summary-box{text-align:center;background:rgba(15,23,42,.5);border-radius:14px;padding:14px}
+  .summary-box .num{font-size:24px;font-weight:900;color:#f472b6}
+  .summary-box .lbl{font-size:11px;color:#64748b;margin-top:4px}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);
+    background:rgba(15,23,42,.95);color:#fff;padding:14px 24px;border-radius:20px;
+    font-size:14px;z-index:100;transition:.3s;border:1px solid #4c1d95;
+    max-width:90%;text-align:center;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="icon">🦉</span>
+  <h1>胡欣纯打瓦记录</h1>
+  <span class="date" id="todayLabel"></span>
+</div>
+
+<div class="container">
+
+  <!-- Record Button -->
+  <div class="record-section">
+    <div class="owl">🦉</div>
+    <div class="now-time" id="liveTime">--:--</div>
+    <div class="now-label" id="liveLabel">当前时间</div>
+    <button class="record-btn" onclick="recordNow()">
+      <span class="pulse">🎯</span> 记录打瓦时间
+    </button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-box"><div class="num" id="sumTotal">0</div><div class="lbl">总打瓦次数</div></div>
+    <div class="summary-box"><div class="num" id="sumMonth">0</div><div class="lbl">本月打瓦</div></div>
+    <div class="summary-box"><div class="num" id="sumAvg">--:--</div><div class="lbl">平均打瓦</div></div>
+  </div>
+
+  <!-- Peak stats -->
+  <div class="section-title">🏆 熬夜之最</div>
+  <div class="stat-grid">
+
+    <div class="stat-box history">
+      <div class="label">💀 历史最晚（巅峰作死）</div>
+      <div class="time" id="histTime">—</div>
+      <div class="date" id="histDate"></div>
+      <div class="quote" id="histQuote">还没有作死记录，快来打破记录吧！</div>
+    </div>
+
+    <div class="stat-box month">
+      <div class="label">📅 本月最晚（近期放纵）</div>
+      <div class="time" id="monthTime">—</div>
+      <div class="date" id="monthDate"></div>
+      <div class="quote" id="monthQuote">这个月还没开始打瓦呢~</div>
+    </div>
+
+    <div class="stat-box week">
+      <div class="label">📉 本周最早（唯一救赎）</div>
+      <div class="time" id="weekTime">—</div>
+      <div class="date" id="weekDate"></div>
+      <div class="quote" id="weekQuote">本周还没打过瓦，今晚来一发？</div>
+    </div>
+
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <h3>📊 本月打瓦时间线（熬夜之最一目了然）</h3>
+    <canvas id="monthChart" height="200"></canvas>
+  </div>
+
+  <!-- Recent -->
+  <div class="section-title">📜 打瓦历史</div>
+  <div id="recordList"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const DB={
+  get(k,def){try{const v=localStorage.getItem('hxc_'+k);return v?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){localStorage.setItem('hxc_'+k,JSON.stringify(v))}
+};
+
+function fmtDate(d){const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+function fmtTime(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function fmtFull(ts){const d=new Date(ts);return fmtDate(d)+' '+fmtTime(d)}
+// 把时间转成"分钟数"方便比较（凌晨0-6点算作前一天的后半夜，加24h）
+function toMinutes(date){
+  let h=date.getHours(),m=date.getMinutes();
+  let mins=h*60+m;
+  // 凌晨0-8点视为前一天的延续，加24h
+  if(h<8)mins+=24*60;
+  return mins;
+}
+function minsToTime(mins){
+  // 还原显示
+  let total=mins%(24*60);
+  let h=Math.floor(total/60),m=total%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+
+// 毒鸡汤
+const QUOTES={
+  veryLate:["那天的你，是不想活了还是不想睡？","凌晨了还在打瓦，你的肝还好吗？","这时间睡的，不是人是猫头鹰吧。","你是打算和太阳一起下班吗？"],
+  late:["这个点打瓦，你是夜行生物吗？","又熬夜了，你的黑眼圈比熊猫还正宗。","这个时间，连鬼都睡了你还醒着。","打瓦打到现在，明天谁替你上班？"],
+  early:["终于早睡了一次！感动天感动地！","哇居然这么早！你被附身了吗？","这个时间打瓦结束？难得的人间清醒。","本周唯一的光，就是你了。"],
+  noEarly:["本周连个像样的早睡都没有，你是猫头鹰转世吗？","本周最早也就这？你的'早'是别人的'晚'。","本周的睡眠时间，堪比修仙。","一周了，没有一天是正常人类的作息。"]
+};
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function recordNow(){
+  const now=new Date();
+  const records=DB.get('records',[]);
+  records.push({ts:now.getTime(),date:fmtDate(now),time:fmtTime(now),mins:toMinutes(now)});
+  DB.set('records',records);
+  renderAll();
+  // toast
+  const h=now.getHours();
+  let msg='🎯 已记录：'+fmtTime(now);
+  if(h<2)msg+='\n\n这时间还行，勉强算人。';
+  else if(h<4)msg+='\n\n又开始了，你的肝在哭泣。';
+  else if(h<6)msg+='\n\n这天都快亮了，你是要修仙吗？';
+  else if(h<8)msg+='\n\n太阳都出来了，你还在打瓦？？？';
+  else msg+='\n\n大白天打瓦，你是夜班选手。';
+  showToast(msg);
+}
+
+function showToast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function getWeekStart(date){
+  const d=new Date(date);d.setHours(0,0,0,0);
+  const day=d.getDay()||7;d.setDate(d.getDate()-day+1);
+  return d;
+}
+
+let monthChart;
+function renderAll(){
+  const records=DB.get('records',[]);
+  if(!records.length){
+    $('#histTime').textContent='—';$('#histDate').textContent='';
+    $('#monthTime').textContent='—';$('#monthDate').textContent='';
+    $('#weekTime').textContent='—';$('#weekDate').textContent='';
+    $('#recordList').innerHTML='<div class="empty"><div class="emoji">🦉</div>还没有打瓦记录<br>点上方按钮记录第一次！</div>';
+    $('#sumTotal').textContent='0';$('#sumMonth').textContent='0';$('#sumAvg').textContent='--:--';
+    renderChart([]);
+    return;
+  }
+
+  // 历史
+  const sorted=[...records].sort((a,b)=>b.mins-a.mins);
+  const hist=sorted[0];
+  $('#histTime').textContent=hist.time;
+  $('#histDate').textContent=fmtDate(new Date(hist.ts));
+  if(hist.mins>=24*60+4*60)$('#histQuote').textContent=pick(QUOTES.veryLate);
+  else if(hist.mins>=24*60+2*60)$('#histQuote').textContent=pick(QUOTES.late);
+  else $('#histQuote').textContent='这居然是你的最晚？还行还行。';
+
+  // 本月
+  const now=new Date();const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const monthRecs=records.filter(r=>r.date.startsWith(ym)).sort((a,b)=>b.mins-a.mins);
+  if(monthRecs.length){
+    const m=monthRecs[0];
+    $('#monthTime').textContent=m.time;
+    $('#monthDate').textContent=fmtDate(new Date(m.ts));
+    if(m.mins>=hist.mins)$('#monthQuote').textContent='打破历史记录了！你是要上天吗？';
+    else if(m.mins>=24*60+3*60)$('#monthQuote').textContent=pick(QUOTES.late);
+    else $('#monthQuote').textContent='这个月还算克制，继续保持...才怪。';
+  }
+
+  // 本周
+  const weekStart=getWeekStart(now);
+  const weekRecs=records.filter(r=>new Date(r.ts)>=weekStart).sort((a,b)=>a.mins-b.mins);
+  if(weekRecs.length){
+    const w=weekRecs[0];
+    $('#weekTime').textContent=w.time;
+    $('#weekDate').textContent=fmtDate(new Date(w.ts));
+    if(w.mins>=24*60+2*60){
+      $('#weekQuote').textContent=pick(QUOTES.noEarly);
+    }else if(w.mins>=24*60){
+      $('#weekQuote').textContent=pick(QUOTES.early);
+    }else{
+      $('#weekQuote').textContent='居然凌晨前打完瓦了！你今天是被绑架了吗？';
+    }
+  }
+
+  // summary
+  $('#sumTotal').textContent=records.length;
+  $('#sumMonth').textContent=monthRecs.length;
+  const avgMins=Math.round(records.reduce((s,r)=>s+r.mins,0)/records.length);
+  $('#sumAvg').textContent=minsToTime(avgMins);
+
+  // record list
+  const recent=[...records].sort((a,b)=>b.ts-a.ts).slice(0,30);
+  $('#recordList').innerHTML=recent.map(r=>{
+    let tag,cls;
+    if(r.mins>=24*60+3*60){tag='🔥 巅峰作死';cls='late'}
+    else if(r.mins>=24*60+1*60){tag='🦉 熬夜';cls='normal'}
+    else{tag='✨ 难得早';cls='early'}
+    const isPeak=r.ts===hist.ts;
+    return `<div class="record-item ${isPeak?'peak':''}">
+      <span class="r-time">${r.time}</span>
+      <span class="r-date">${r.date}</span>
+      <span class="r-tag ${cls}">${tag}</span>
+      <span class="del" onclick="delRecord(${r.ts})">✕</span>
+    </div>`;
+  }).join('');
+
+  // chart - 本月按日期
+  renderChart(monthRecs);
+}
+
+function delRecord(ts){
+  if(!confirm('删除这条记录？'))return;
+  const records=DB.get('records',[]).filter(r=>r.ts!==ts);
+  DB.set('records',records);renderAll();
+}
+
+function renderChart(monthRecs){
+  if(!monthRecs.length){
+    const ctx=$('#monthChart').getContext('2d');
+    if(monthChart)monthChart.destroy();
+    return;
+  }
+  // 按日期排序
+  const sorted=[...monthRecs].sort((a,b)=>a.ts-b.ts);
+  const labels=sorted.map(r=>r.date.slice(5));
+  const data=sorted.map(r=>{
+    // 转成"小时.小数"格式，凌晨算前一天+24
+    let h=parseInt(r.time.split(':')[0]);
+    let m=parseInt(r.time.split(':')[1]);
+    let val=h+m/60;
+    if(h<8)val+=24;
+    return val;
+  });
+
+  const ctx=$('#monthChart').getContext('2d');
+  if(monthChart)monthChart.destroy();
+  monthChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[{
+        label:'打瓦时间',
+        data:data,
+        borderColor:'#a78bfa',
+        backgroundColor:'rgba(167,139,250,.15)',
+        fill:true,tension:.3,
+        pointBackgroundColor:data.map(v=>v>=27?'#ef4444':v>=25?'#f59e0b':'#22c55e'),
+        pointBorderColor:data.map(v=>v>=27?'#ef4444':v>=25?'#f59e0b':'#22c55e'),
+        pointRadius:6,pointHoverRadius:9
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{labels:{color:'#94a3b8',font:{size:11}}},
+        tooltip:{
+          callbacks:{
+            label:function(ctx){
+              const v=ctx.raw;
+              let h=Math.floor(v)%24;
+              let m=Math.round((v%1)*60);
+              return '打瓦时间: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'#1e1b4b'}},
+        y:{
+          ticks:{color:'#64748b',font:{size:10},
+            callback:function(v){
+              let h=Math.floor(v)%24;
+              return String(h).padStart(2,'0')+':00';
+            }
+          },
+          grid:{color:'#1e1b4b'},
+          min:22,max:30
+        }
+      }
+    }
+  });
+}
+
+// Live clock
+function updateClock(){
+  const now=new Date();
+  $('#liveTime').textContent=fmtTime(now);
+  const h=now.getHours();
+  let label='当前时间';
+  if(h>=0&&h<6)label='🌙 深夜打瓦高发期';
+  else if(h>=6&&h<12)label='☀️ 大白天打瓦？';
+  else if(h>=12&&h<18)label='🌤️ 下午打瓦时间';
+  else if(h>=18&&h<22)label='🌆 晚上打瓦时间';
+  else label='🦉 熬夜进行时';
+  $('#liveLabel').textContent=label;
+}
+setInterval(updateClock,1000);updateClock();
+
+$('#todayLabel').textContent=fmtDate(new Date());
+renderAll();
+</script>
+</body>
+</html>
