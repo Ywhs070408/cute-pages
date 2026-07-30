@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="马鹤玮减肥记录">
+<title>马鹤玮的减肥日记 🌸</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#fef6f8; --panel:#ffffff; --panel2:#fdf2f5; --border:#fce7ee;
+    --text:#4a3340; --text2:#b08fa0; --accent:#f472b6; --accent2:#c084fc;
+    --pink:#ec4899; --rose:#fb7185; --purple:#a855f7; --mint:#5eead4;
+    --green:#34d399; --orange:#fb923c; --yellow:#fbbf24; --blue:#60a5fa;
+    --radius:20px; --shadow:0 6px 20px rgba(236,72,153,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;
+    overflow:hidden;
+  }
+  ::-webkit-scrollbar{width:0;height:0}
+
+  .app{display:flex;height:100vh;height:100dvh}
+  .sidebar{
+    width:240px;background:linear-gradient(180deg,#fff5f8,#fce7ee);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;flex-shrink:0;transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:100;
+  }
+  .sidebar-header{padding:24px 18px 20px;border-bottom:1px solid var(--border)}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo .avatar{
+    width:44px;height:44px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    box-shadow:0 4px 12px rgba(236,72,153,.25);
+  }
+  .logo .name{font-size:16px;font-weight:700;color:var(--text)}
+  .logo .sub{font-size:11px;color:var(--text2);font-weight:500;margin-top:2px}
+  nav{flex:1;padding:16px 12px;overflow-y:auto}
+  .nav-section-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:0 14px;margin:10px 0 6px}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+    color:var(--text2);cursor:pointer;font-size:14.5px;margin-bottom:3px;transition:.2s;font-weight:500;
+  }
+  .nav-item:hover{background:rgba(244,114,182,.1);color:var(--text)}
+  .nav-item.active{background:linear-gradient(135deg,rgba(244,114,182,.2),rgba(192,132,252,.2));color:var(--pink);font-weight:600}
+  .nav-item .icon{font-size:20px;width:24px;text-align:center}
+  .sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);text-align:center}
+
+  .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden}
+  .topbar{
+    display:flex;align-items:center;gap:12px;padding:14px 20px;
+    background:rgba(255,255,255,.85);border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  }
+  .menu-btn{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px}
+  .topbar h1{font-size:18px;font-weight:700;flex:1}
+  .topbar .date-pill{font-size:12px;color:var(--pink);background:var(--panel2);padding:6px 14px;border-radius:20px;font-weight:600}
+  .content{padding:20px;max-width:1000px;margin:0 auto;padding-bottom:100px}
+
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;box-shadow:var(--shadow);
+  }
+  .card-title{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--text)}
+  .card-title .ico{font-size:20px}
+  .grid{display:grid;gap:12px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:560px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}}
+
+  .stat{
+    background:var(--panel2);border-radius:16px;padding:14px;position:relative;overflow:hidden;
+  }
+  .stat::before{
+    content:'';position:absolute;top:-10px;right:-10px;width:50px;height:50px;border-radius:50%;opacity:.1;
+  }
+  .stat.pink::before{background:var(--pink)} .stat.purple::before{background:var(--purple)}
+  .stat.green::before{background:var(--green)} .stat.orange::before{background:var(--orange)}
+  .stat.blue::before{background:var(--blue)} .stat.yellow::before{background:var(--yellow)}
+  .stat .label{font-size:12px;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+  .stat .value{font-size:22px;font-weight:800;color:var(--text)}
+  .stat .unit{font-size:12px;color:var(--text2);font-weight:500;margin-left:3px}
+  .stat.pink .value{color:var(--pink)} .stat.purple .value{color:var(--purple)}
+  .stat.green .value{color:var(--green)} .stat.orange .value{color:var(--orange)}
+  .stat.blue .value{color:var(--blue)} .stat.yellow .value{color:var(--yellow)}
+
+  input,select,textarea{
+    background:var(--panel2);border:1.5px solid var(--border);border-radius:14px;
+    padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;width:100%;outline:none;transition:.2s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:600}
+  .btn{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;
+    padding:10px 18px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;
+    box-shadow:0 4px 12px rgba(236,72,153,.25);
+  }
+  .btn:hover{filter:brightness(1.05)}
+  .btn:active{transform:scale(.96)}
+  .btn.ghost{background:var(--panel2);color:var(--text);border:1.5px solid var(--border);box-shadow:none}
+  .btn.sm{padding:7px 12px;font-size:12.5px}
+  .btn.mint{background:linear-gradient(135deg,var(--mint),var(--green));box-shadow:0 4px 12px rgba(52,211,153,.25)}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .row > *{flex:1;min-width:110px}
+  .row .btn{flex:0 0 auto;min-width:auto}
+
+  /* Meal photo cards */
+  .meal-card{
+    background:var(--panel2);border-radius:18px;padding:14px;margin-bottom:12px;
+    border:1.5px solid transparent;transition:.2s;
+  }
+  .meal-card.has-photo{border-color:var(--accent)}
+  .meal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .meal-head .meal-emoji{font-size:24px}
+  .meal-head .meal-name{font-size:15px;font-weight:700;flex:1}
+  .meal-head .meal-cal{font-size:13px;color:var(--pink);font-weight:700}
+  .photo-area{
+    width:100%;aspect-ratio:16/10;border-radius:14px;background:var(--panel);
+    border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;overflow:hidden;position:relative;transition:.2s;
+  }
+  .photo-area:hover{border-color:var(--accent)}
+  .photo-area img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+  .photo-area .ph-hint{font-size:28px;color:var(--text2)}
+  .photo-area .ph-text{font-size:12px;color:var(--text2);margin-top:6px}
+  .photo-input{display:none}
+  .meal-desc{margin-top:8px;font-size:13px}
+  .meal-desc input{padding:7px 10px;font-size:13px}
+  .meal-desc .cal-input{display:flex;gap:8px;align-items:center;margin-top:6px}
+  .meal-desc .cal-input input{flex:1}
+  .del-photo{
+    position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;border:none;
+    border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+
+  /* Exercise */
+  .exercise-card{background:var(--panel2);border-radius:16px;padding:14px;margin-bottom:10px}
+  .ex-tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .ex-tab{padding:8px 14px;border-radius:20px;background:var(--panel2);font-size:13px;cursor:pointer;color:var(--text2);transition:.2s;font-weight:600;border:1.5px solid transparent}
+  .ex-tab.active{background:linear-gradient(135deg,var(--mint),var(--green));color:#fff;border-color:transparent}
+  .body-map{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+  .body-part{
+    padding:10px;border-radius:12px;background:var(--panel);border:1.5px solid var(--border);
+    text-align:center;font-size:13px;cursor:pointer;transition:.2s;font-weight:600;
+  }
+  .body-part.selected{background:linear-gradient(135deg,rgba(94,234,212,.3),rgba(52,211,153,.2));border-color:var(--mint);color:var(--green)}
+  .body-part .bp-emoji{font-size:22px;display:block;margin-bottom:2px}
+  .plan-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel);border-radius:12px;margin-bottom:6px}
+  .plan-item .check{width:20px;height:20px;border-radius:7px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+  .plan-item.done .check{background:var(--green);border-color:var(--green);color:#fff}
+  .plan-item.done .text{text-decoration:line-through;color:var(--text2)}
+  .plan-item .text{flex:1;font-size:13.5px}
+  .plan-item .del{color:var(--rose);cursor:pointer;opacity:.6}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .tab{padding:7px 14px;border-radius:20px;background:var(--panel2);font-size:13px;cursor:pointer;color:var(--text2);transition:.2s;font-weight:600}
+  .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-day{aspect-ratio:1;border-radius:10px;background:var(--panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;position:relative}
+  .cal-day.empty{background:transparent}
+  .cal-day.today{border:2px solid var(--accent)}
+  .cal-day.done{background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(94,234,212,.15))}
+  .cal-day .dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:2px}
+  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;text-align:center;font-size:11px;color:var(--text2)}
+
+  .section{display:none}
+  .section.active{display:block;animation:fade .3s cubic-bezier(.4,0,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(74,51,64,.4);z-index:99;backdrop-filter:blur(4px)}
+
+  @media(max-width:820px){
+    .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);box-shadow:4px 0 30px rgba(0,0,0,.1)}
+    .sidebar.open{transform:translateX(0)}
+    .menu-btn{display:block}
+    .overlay.show{display:block}
+    .content{padding:16px;padding-bottom:100px}
+  }
+  .empty-hint{text-align:center;padding:30px;color:var(--text2);font-size:13px}
+
+  /* Cute decorative elements */
+  .cute-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .cute-header .deco{font-size:22px}
+  .tip-box{
+    background:linear-gradient(135deg,rgba(244,114,182,.08),rgba(192,132,252,.08));
+    border-radius:14px;padding:12px 14px;font-size:12.5px;color:var(--text2);
+    margin-top:10px;display:flex;gap:8px;align-items:flex-start;
+  }
+  .tip-box .tip-emoji{font-size:16px;flex-shrink:0}
+  .progress-ring{width:60px;height:60px;position:relative}
+  .progress-ring svg{transform:rotate(-90deg)}
+  .progress-ring .ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+  .progress-ring .ring-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .5s}
+  .progress-ring .ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--pink)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="avatar">🌷</div>
+        <div>
+          <div class="name">马鹤玮</div>
+          <div class="sub">减肥日记 · 上班族版</div>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-section-label">记录</div>
+      <div class="nav-item active" data-sec="dashboard"><span class="icon">🏠</span>今日概览</div>
+      <div class="nav-item" data-sec="diet"><span class="icon">🍱</span>三餐记录</div>
+      <div class="nav-item" data-sec="weight"><span class="icon">⚖️</span>体重记录</div>
+      <div class="nav-section-label">健康</div>
+      <div class="nav-item" data-sec="exercise"><span class="icon">💪</span>锻炼计划</div>
+      <div class="nav-item" data-sec="stats"><span class="icon">📊</span>数据统计</div>
+    </nav>
+    <div class="sidebar-footer">🌸 加油马鹤玮 🌸</div>
+  </aside>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1 id="pageTitle">今日概览</h1>
+      <div class="date-pill" id="todayPill"></div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="sec-dashboard">
+        <div class="card">
+          <div class="cute-header"><span class="deco">👋</span><span style="font-size:17px;font-weight:700">嗨，马鹤玮！</span></div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">今天也要好好吃饭、好好运动哦～</p>
+          <div class="grid grid-4">
+            <div class="stat pink"><div class="label">🍱 今日摄入</div><div class="value" id="dIntake">0<span class="unit">kcal</span></div></div>
+            <div class="stat orange"><div class="label">🔥 今日消耗</div><div class="value" id="dBurn">0<span class="unit">kcal</span></div></div>
+            <div class="stat green"><div class="label">💨 热量缺口</div><div class="value" id="dGap">0<span class="unit">kcal</span></div></div>
+            <div class="stat purple"><div class="label">⚖️ 当前体重</div><div class="value" id="dWeight">—<span class="unit">kg</span></div></div>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title"><span class="ico">📈</span>体重趋势</div>
+            <canvas id="dashWeightChart" height="150"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ico">🔥</span>热量缺口</div>
+            <canvas id="dashCalChart" height="150"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title"><span class="ico">💪</span>今日锻炼</div>
+            <div id="dashExercise"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ico">🍱</span>三餐速览</div>
+            <div id="dashMeals"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIET -->
+      <section class="section" id="sec-diet">
+        <div class="card">
+          <div class="card-title"><span class="ico">📅</span>选择日期</div>
+          <div class="row">
+            <div><label>记录日期</label><input type="date" id="dietDate"></div>
+            <div><label>基础代谢(kcal)</label><input type="number" id="tdee" placeholder="如 1500"></div>
+          </div>
+          <div class="grid grid-3" style="margin-top:14px">
+            <div class="stat pink"><div class="label">🍱 摄入</div><div class="value" id="sumIntake">0<span class="unit">kcal</span></div></div>
+            <div class="stat orange"><div class="label">🔥 消耗</div><div class="value" id="sumBurn">0<span class="unit">kcal</span></div></div>
+            <div class="stat green"><div class="label">💨 缺口</div><div class="value" id="sumGap">0<span class="unit">kcal</span></div></div>
+          </div>
+          <div class="tip-box"><span class="tip-emoji">💡</span><span>热量缺口 = 基础代谢 + 运动消耗 − 食物摄入。建议每日缺口 300~500 kcal，健康减脂不挨饿哦～</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ico">📸</span>三餐拍照记录</div>
+          <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">点击拍照区域上传食物照片，记录每餐热量～</p>
+
+          <!-- Breakfast -->
+          <div class="meal-card" id="mealCard-breakfast">
+            <div class="meal-head">
+              <span class="meal-emoji">🌅</span>
+              <span class="meal-name">早餐</span>
+              <span class="meal-cal" id="cal-breakfast">0 kcal</span>
+            </div>
+            <div class="photo-area" onclick="document.getElementById('photo-breakfast').click()">
+              <span class="ph-hint">📷</span>
+              <span class="ph-text">点击上传早餐照片</span>
+            </div>
+            <input type="file" class="photo-input" id="photo-breakfast" accept="image/*" onchange="uploadPhoto('breakfast',this)">
+            <div class="meal-desc">
+              <input type="text" id="desc-breakfast" placeholder="吃了什么？如：燕麦+鸡蛋" oninput="saveMealDesc('breakfast',this.value)">
+              <div class="cal-input">
+                <input type="number" id="calInput-breakfast" placeholder="热量(kcal)" oninput="saveMealCal('breakfast',this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Lunch -->
+          <div class="meal-card" id="mealCard-lunch">
+            <div class="meal-head">
+              <span class="meal-emoji">☀️</span>
+              <span class="meal-name">午餐</span>
+              <span class="meal-cal" id="cal-lunch">0 kcal</span>
+            </div>
+            <div class="photo-area" onclick="document.getElementById('photo-lunch').click()">
+              <span class="ph-hint">📷</span>
+              <span class="ph-text">点击上传午餐照片</span>
+            </div>
+            <input type="file" class="photo-input" id="photo-lunch" accept="image/*" onchange="uploadPhoto('lunch',this)">
+            <div class="meal-desc">
+              <input type="text" id="desc-lunch" placeholder="吃了什么？如：鸡胸肉沙拉" oninput="saveMealDesc('lunch',this.value)">
+              <div class="cal-input">
+                <input type="number" id="calInput-lunch" placeholder="热量(kcal)" oninput="saveMealCal('lunch',this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dinner -->
+          <div class="meal-card" id="mealCard-dinner">
+            <div class="meal-head">
+              <span class="meal-emoji">🌙</span>
+              <span class="meal-name">晚餐</span>
+              <span class="meal-cal" id="cal-dinner">0 kcal</span>
+            </div>
+            <div class="photo-area" onclick="document.getElementById('photo-dinner').click()">
+              <span class="ph-hint">📷</span>
+              <span class="ph-text">点击上传晚餐照片</span>
+            </div>
+            <input type="file" class="photo-input" id="photo-dinner" accept="image/*" onchange="uploadPhoto('dinner',this)">
+            <div class="meal-desc">
+              <input type="text" id="desc-dinner" placeholder="吃了什么？如：蔬菜汤" oninput="saveMealDesc('dinner',this.value)">
+              <div class="cal-input">
+                <input type="number" id="calInput-dinner" placeholder="热量(kcal)" oninput="saveMealCal('dinner',this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Snack -->
+          <div class="meal-card" id="mealCard-snack">
+            <div class="meal-head">
+              <span class="meal-emoji">🍪</span>
+              <span class="meal-name">加餐</span>
+              <span class="meal-cal" id="cal-snack">0 kcal</span>
+            </div>
+            <div class="photo-area" onclick="document.getElementById('photo-snack').click()">
+              <span class="ph-hint">📷</span>
+              <span class="ph-text">点击上传加餐照片</span>
+            </div>
+            <input type="file" class="photo-input" id="photo-snack" accept="image/*" onchange="uploadPhoto('snack',this)">
+            <div class="meal-desc">
+              <input type="text" id="desc-snack" placeholder="吃了什么？如：苹果一个" oninput="saveMealDesc('snack',this.value)">
+              <div class="cal-input">
+                <input type="number" id="calInput-snack" placeholder="热量(kcal)" oninput="saveMealCal('snack',this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WEIGHT -->
+      <section class="section" id="sec-weight">
+        <div class="card">
+          <div class="card-title"><span class="ico">⚖️</span>记录体重</div>
+          <div class="row">
+            <div><label>📅 日期</label><input type="date" id="weightDate"></div>
+            <div><label>🌅 早晨体重(kg)</label><input type="number" step="0.1" id="weightAM" placeholder="如 58.5"></div>
+            <div><label>🌙 晚上体重(kg)</label><input type="number" step="0.1" id="weightPM" placeholder="如 59.0"></div>
+            <button class="btn" onclick="saveWeight()">保存</button>
+          </div>
+          <div class="tip-box"><span class="tip-emoji">🌸</span><span>建议每天早晨起床排便后空腹称重，数据最稳定～晚上称重会比早晨重 0.5~1kg，这是正常的哦！</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ico">📈</span>体重趋势</div>
+          <canvas id="weightChart" height="140"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ico">📋</span>历史记录</div>
+          <div id="weightHistory"></div>
+        </div>
+      </section>
+
+      <!-- EXERCISE -->
+      <section class="section" id="sec-exercise">
+        <div class="card">
+          <div class="card-title"><span class="ico">💪</span>今日锻炼部位</div>
+          <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">点击选择今天要锻炼的部位（可多选）～</p>
+          <div class="body-map" id="bodyMap">
+            <div class="body-part" data-part="肩部"><span class="bp-emoji">💪</span>肩部</div>
+            <div class="body-part" data-part="胸部"><span class="bp-emoji">🫁</span>胸部</div>
+            <div class="body-part" data-part="背部"><span class="bp-emoji">🔙</span>背部</div>
+            <div class="body-part" data-part="手臂"><span class="bp-emoji">🙆</span>手臂</div>
+            <div class="body-part" data-part="腹部"><span class="bp-emoji">🧘</span>腹部</div>
+            <div class="body-part" data-part="臀部"><span class="bp-emoji">🍑</span>臀部</div>
+            <div class="body-part" data-part="腿部"><span class="bp-emoji">🦵</span>腿部</div>
+            <div class="body-part" data-part="全身"><span class="bp-emoji">🏃</span>全身有氧</div>
+          </div>
+          <div class="row" style="margin-top:14px">
+            <div><label>🔥 运动消耗(kcal)</label><input type="number" id="exCal" placeholder="如 300"></div>
+            <div><label>⏱️ 时长(分钟)</label><input type="number" id="exMin" placeholder="如 40"></div>
+            <button class="btn mint" onclick="saveExercise()">保存锻炼</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ico">📋</span>锻炼计划清单</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="text" id="planInput" placeholder="添加训练动作，如：哑铃推举 3x12" onkeypress="if(event.key==='Enter')addPlan()" style="flex:1">
+            <button class="btn sm" onclick="addPlan()">添加</button>
+          </div>
+          <div id="planList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ico">📅</span>本周锻炼日历</div>
+          <div class="cal-head" id="exCalHead"></div>
+          <div class="calendar" id="exCalendar"></div>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="section" id="sec-stats">
+        <div class="card">
+          <div class="card-title"><span class="ico">📊</span>数据统计</div>
+          <div class="tabs">
+            <div class="tab active" data-st="week">本周</div>
+            <div class="tab" data-st="month">本月</div>
+            <div class="tab" data-st="all">全部</div>
+          </div>
+          <div class="grid grid-4" id="statsGrid"></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title"><span class="ico">⚖️</span>体重变化</div>
+            <canvas id="stWeightChart" height="150"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ico">🔥</span>热量趋势</div>
+            <canvas id="stCalChart" height="150"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ico">💪</span>锻炼部位分布</div>
+          <canvas id="stBodyChart" height="160"></canvas>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const fmtDate=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const todayStr=()=>fmtDate(new Date());
+const todayCN=()=>{const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getMonth()+1}月${d.getDate()}日 周${w}`};
+
+const DB={
+  get(k,def){try{const v=localStorage.getItem('mhw_'+k);return v?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){try{localStorage.setItem('mhw_'+k,JSON.stringify(v))}catch(e){console.log('storage full')}}
+};
+const PREFIX='mhw_';
+
+let state={dietDate:todayStr(),weightDate:todayStr(),statsTab:'week'};
+
+function toggleSidebar(){$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('show')}
+$$('.nav-item').forEach(n=>n.onclick=()=>{
+  $$('.nav-item').forEach(x=>x.classList.remove('active'));
+  n.classList.add('active');
+  const sec=n.dataset.sec;
+  $$('.section').forEach(s=>s.classList.remove('active'));
+  $('#sec-'+sec).classList.add('active');
+  $('#pageTitle').textContent=n.textContent.trim();
+  if(window.innerWidth<=820){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show')}
+  renderAll();
+});
+
+// ---- DIET ----
+function getDietData(date){
+  const all=DB.get('diet',{});
+  if(!all[date])all[date]={meals:{breakfast:{photo:'',desc:'',cal:0},lunch:{photo:'',desc:'',cal:0},dinner:{photo:'',desc:'',cal:0},snack:{photo:'',desc:'',cal:0}},tdee:1500};
+  // migrate
+  if(!all[date].meals.breakfast)all[date].meals={breakfast:{photo:'',desc:'',cal:0},lunch:{photo:'',desc:'',cal:0},dinner:{photo:'',desc:'',cal:0},snack:{photo:'',desc:'',cal:0}};
+  DB.set('diet',all);
+  return all[date];
+}
+function uploadPhoto(meal,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    // compress
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const maxW=800;let{width:w,height:h}=img;
+      if(w>maxW){h=h*maxW/w;w=maxW}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const data=canvas.toDataURL('image/jpeg',0.7);
+      const d=getDietData(state.dietDate);
+      d.meals[meal].photo=data;
+      DB.set('diet',{...DB.get('diet',{}),[state.dietDate]:d});
+      renderDiet();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function delPhoto(meal){
+  if(!confirm('确定删除这张照片吗？'))return;
+  const d=getDietData(state.dietDate);
+  d.meals[meal].photo='';
+  DB.set('diet',{...DB.get('diet',{}),[state.dietDate]:d});
+  renderDiet();
+}
+function saveMealDesc(meal,val){
+  const d=getDietData(state.dietDate);
+  d.meals[meal].desc=val;
+  DB.set('diet',{...DB.get('diet',{}),[state.dietDate]:d});
+  renderDietCal();
+}
+function saveMealCal(meal,val){
+  const d=getDietData(state.dietDate);
+  d.meals[meal].cal=Number(val)||0;
+  DB.set('diet',{...DB.get('diet',{}),[state.dietDate]:d});
+  renderDietCal();
+}
+
+function renderDiet(){
+  const d=getDietData(state.dietDate);
+  $('#dietDate').value=state.dietDate;
+  $('#tdee').value=d.tdee||1500;
+  $('#dietDate').onchange=e=>{state.dietDate=e.target.value;renderDiet()};
+  const mealNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};
+  ['breakfast','lunch','dinner','snack'].forEach(meal=>{
+    const m=d.meals[meal];
+    const card=$('#mealCard-'+meal);
+    const area=card.querySelector('.photo-area');
+    if(m.photo){
+      area.innerHTML=`<img src="${m.photo}"><button class="del-photo" onclick="event.stopPropagation();delPhoto('${meal}')">✕</button>`;
+      card.classList.add('has-photo');
+    }else{
+      area.innerHTML='<span class="ph-hint">📷</span><span class="ph-text">点击上传'+mealNames[meal]+'照片</span>';
+      card.classList.remove('has-photo');
+    }
+    $('#desc-'+meal).value=m.desc||'';
+    $('#calInput-'+meal).value=m.cal||'';
+  });
+  renderDietCal();
+}
+function renderDietCal(){
+  const d=getDietData(state.dietDate);
+  let intake=0;
+  ['breakfast','lunch','dinner','snack'].forEach(m=>{intake+=Number(d.meals[m].cal)||0;$('#cal-'+m).textContent=(d.meals[m].cal||0)+' kcal'});
+  const exData=DB.get('exercise',{});
+  let exCal=0;
+  if(exData[state.dietDate])exCal=exData[state.dietDate].cal||0;
+  const burn=(Number(d.tdee)||1500)+exCal;
+  const gap=burn-intake;
+  $('#sumIntake').innerHTML=intake+'<span class="unit">kcal</span>';
+  $('#sumBurn').innerHTML=burn+'<span class="unit">kcal</span>';
+  $('#sumGap').innerHTML=(gap>0?'+'+gap:gap)+'<span class="unit">kcal</span>';
+  $('#sumGap').parentElement.className='stat '+(gap>0?'green':'orange');
+}
+
+// ---- WEIGHT ----
+function saveWeight(){
+  const d=$('#weightDate').value||todayStr();
+  const am=$('#weightAM').value;const pm=$('#weightPM').value;
+  if(!am&&!pm){alert('请至少填写一个体重数据');return}
+  const all=DB.get('weight',{});
+  all[d]={am:am?Number(am):'',pm:pm?Number(pm):''};
+  DB.set('weight',all);
+  $('#weightAM').value='';$('#weightPM').value='';
+  renderWeight();renderDashboard();
+}
+function delWeight(date){
+  if(!confirm('确定删除这条记录？'))return;
+  const all=DB.get('weight',{});delete all[date];DB.set('weight',all);
+  renderWeight();renderDashboard();
+}
+function renderWeight(){
+  $('#weightDate').value=state.weightDate;
+  $('#weightDate').onchange=e=>{state.weightDate=e.target.value};
+  const all=DB.get('weight',{});
+  const dates=Object.keys(all).sort();
+  const wctx=$('#weightChart').getContext('2d');
+  if(window.wChart)window.wChart.destroy();
+  window.wChart=new Chart(wctx,{type:'line',data:{labels:dates.map(d=>d.slice(5)),datasets:[
+    {label:'早晨',data:dates.map(d=>all[d].am||null),borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.12)',fill:true,tension:.35,spanGaps:true},
+    {label:'晚上',data:dates.map(d=>all[d].pm||null),borderColor:'#a855f7',backgroundColor:'rgba(168,85,247,.08)',fill:false,tension:.35,spanGaps:true,borderDash:[5,5]}
+  ]},options:chartOpt()});
+  // history
+  if(!dates.length){$('#weightHistory').innerHTML='<div class="empty-hint">还没有体重记录</div>';return}
+  $('#weightHistory').innerHTML=dates.reverse().slice(0,20).map(d=>`<div class="meal-list-item" style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--panel2);border-radius:12px;margin-bottom:6px;font-size:13.5px"><span>📅 ${d}</span><span>🌅 ${all[d].am||'—'}kg · 🌙 ${all[d].pm||'—'}kg</span><span style="color:var(--rose);cursor:pointer" onclick="delWeight('${d}')">✕</span></div>`).join('');
+}
+
+// ---- EXERCISE ----
+function getExData(date){
+  const all=DB.get('exercise',{});
+  if(!all[date])all[date]={parts:[],cal:0,min:0,plans:[]};
+  DB.set('exercise',all);
+  return all[date];
+}
+$$('.body-part').forEach(b=>b.onclick=()=>{
+  const ex=getExData(state.dietDate);
+  const part=b.dataset.part;
+  b.classList.toggle('selected');
+  if(b.classList.contains('selected')){
+    if(!ex.parts.includes(part))ex.parts.push(part);
+  }else{
+    ex.parts=ex.parts.filter(p=>p!==part);
+  }
+  DB.set('exercise',{...DB.get('exercise',{}),[state.dietDate]:ex});
+});
+function saveExercise(){
+  const ex=getExData(state.dietDate);
+  ex.cal=Number($('#exCal').value)||0;
+  ex.min=Number($('#exMin').value)||0;
+  DB.set('exercise',{...DB.get('exercise',{}),[state.dietDate]:ex});
+  $('#exCal').value='';$('#exMin').value='';
+  renderExercise();renderDietCal();renderDashboard();
+  alert('💪 锻炼记录已保存！');
+}
+function addPlan(){
+  const v=$('#planInput').value.trim();if(!v)return;
+  const ex=getExData(state.dietDate);
+  ex.plans.push({text:v,done:false});
+  DB.set('exercise',{...DB.get('exercise',{}),[state.dietDate]:ex});
+  $('#planInput').value='';renderExercise();
+}
+function togglePlan(i){
+  const ex=getExData(state.dietDate);
+  ex.plans[i].done=!ex.plans[i].done;
+  DB.set('exercise',{...DB.get('exercise',{}),[state.dietDate]:ex});
+  renderExercise();renderDashboard();
+}
+function delPlan(i){
+  const ex=getExData(state.dietDate);
+  ex.plans.splice(i,1);
+  DB.set('exercise',{...DB.get('exercise',{}),[state.dietDate]:ex});
+  renderExercise();
+}
+function renderExercise(){
+  const ex=getExData(state.dietDate);
+  $$('.body-part').forEach(b=>{
+    if(ex.parts.includes(b.dataset.part))b.classList.add('selected');
+    else b.classList.remove('selected');
+  });
+  $('#exCal').value=ex.cal||'';
+  $('#exMin').value=ex.min||'';
+  // plans
+  if(!ex.plans.length){$('#planList').innerHTML='<div class="empty-hint">还没有训练计划，添加第一个吧</div>'}
+  else $('#planList').innerHTML=ex.plans.map((p,i)=>`<div class="plan-item ${p.done?'done':''}"><div class="check" onclick="togglePlan(${i})">${p.done?'✓':''}</div><div class="text">${p.text}</div><span class="del" onclick="delPlan(${i})">✕</span></div>`).join('');
+  // calendar
+  const all=DB.get('exercise',{});
+  const now=new Date();const y=now.getFullYear();const m=now.getMonth();
+  const first=new Date(y,m,1).getDay();const days=new Date(y,m+1,0).getDate();
+  const heads=['日','一','二','三','四','五','六'];
+  $('#exCalHead').innerHTML=heads.map(h=>`<div>${h}</div>`).join('');
+  let html='';for(let i=0;i<first;i++)html+='<div class="cal-day empty"></div>';
+  for(let i=1;i<=days;i++){
+    const ds=fmtDate(new Date(y,m,i));
+    const done=all[ds]&&(all[ds].cal>0||all[ds].parts.length);
+    const isToday=ds===todayStr();
+    html+=`<div class="cal-day ${done?'done':''} ${isToday?'today':''}">${i}${done?'<div class="dot"></div>':''}</div>`;
+  }
+  $('#exCalendar').innerHTML=html;
+}
+
+// ---- STATS ----
+$$('.tab[data-st]').forEach(t=>t.onclick=()=>{
+  $$('.tab[data-st]').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');state.statsTab=t.dataset.st;renderStats();
+});
+function renderStats(){
+  const diet=DB.get('diet',{});
+  const weight=DB.get('weight',{});
+  const ex=DB.get('exercise',{});
+  const now=new Date();
+  let dates=Object.keys(diet).sort();
+  if(state.statsTab==='week'){const w=new Date(now-7*86400000);dates=dates.filter(d=>new Date(d)>=w)}
+  else if(state.statsTab==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);dates=dates.filter(d=>new Date(d)>=m)}
+  let avgGap=0,gapCount=0,avgIntake=0,intakeCount=0,totalEx=0,exCount=0;
+  const wDates=Object.keys(weight).sort();
+  let wStart=null,wEnd=null;
+  wDates.forEach(d=>{const w=weight[d].am||weight[d].pm;if(w){if(!wStart)wStart=Number(w);wEnd=Number(w)}});
+  dates.forEach(d=>{
+    const dd=diet[d];if(!dd)return;
+    let intake=0;['breakfast','lunch','dinner','snack'].forEach(m=>intake+=Number(dd.meals[m].cal)||0);
+    if(intake){avgIntake+=intake;intakeCount++}
+    const exCal=ex[d]?ex[d].cal||0:0;
+    const gap=((Number(dd.tdee)||1500)+exCal)-intake;
+    if(gap){avgGap+=gap;gapCount++}
+    if(exCal){totalEx+=exCal;exCount++}
+  });
+  avgGap=gapCount?Math.round(avgGap/gapCount):0;
+  avgIntake=intakeCount?Math.round(avgIntake/intakeCount):0;
+  const wChange=wStart&&wEnd?(wEnd-wStart).toFixed(1):0;
+  $('#statsGrid').innerHTML=`
+    <div class="stat green"><div class="label">💨 平均缺口</div><div class="value">${avgGap}<span class="unit">kcal</span></div></div>
+    <div class="stat pink"><div class="label">🍱 平均摄入</div><div class="value">${avgIntake}<span class="unit">kcal</span></div></div>
+    <div class="stat orange"><div class="label">🔥 运动消耗</div><div class="value">${totalEx}<span class="unit">kcal</span></div></div>
+    <div class="stat purple"><div class="label">⚖️ 体重变化</div><div class="value">${wChange}<span class="unit">kg</span></div></div>`;
+  // charts
+  const last7=dates.slice(-7);
+  const ws=last7.map(d=>{const w=weight[d];return w?(w.am||w.pm?Number(w.am||w.pm):null):null});
+  const gs=last7.map(d=>{const dd=diet[d];if(!dd)return 0;let s=0;['breakfast','lunch','dinner','snack'].forEach(m=>s+=Number(dd.meals[m].cal)||0);const exCal=ex[d]?ex[d].cal||0:0;return((Number(dd.tdee)||1500)+exCal)-s});
+  const wctx=$('#stWeightChart').getContext('2d');
+  if(window.stW)window.stW.destroy();
+  window.stW=new Chart(wctx,{type:'line',data:{labels:last7.map(d=>d.slice(5)),datasets:[{label:'体重',data:ws,borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.12)',fill:true,tension:.35,spanGaps:true}]},options:chartOpt()});
+  const gctx=$('#stCalChart').getContext('2d');
+  if(window.stC)window.stC.destroy();
+  window.stC=new Chart(gctx,{type:'bar',data:{labels:last7.map(d=>d.slice(5)),datasets:[{label:'热量缺口',data:gs,backgroundColor:'#34d399'}]},options:chartOpt()});
+  // body part distribution
+  const partCount={};
+  Object.values(ex).forEach(e=>{(e.parts||[]).forEach(p=>partCount[p]=(partCount[p]||0)+1)});
+  const bctx=$('#stBodyChart').getContext('2d');
+  if(window.stB)window.stB.destroy();
+  const partLabels=Object.keys(partCount);
+  if(partLabels.length){
+    window.stB=new Chart(bctx,{type:'doughnut',data:{labels:partLabels,datasets:[{data:partLabels.map(p=>partCount[p]),backgroundColor:['#f472b6','#c084fc','#60a5fa','#34d399','#fbbf24','#fb923c','#fb7185','#5eead4']}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:'#b08fa0',font:{size:11}}}}}});
+  }else{
+    bctx.canvas.parentElement.innerHTML='<div class="empty-hint">还没有锻炼记录</div>'
+  }
+}
+
+function chartOpt(){return{responsive:true,plugins:{legend:{labels:{color:'#b08fa0',font:{size:11}}}},scales:{x:{ticks:{color:'#b08fa0',font:{size:10}},grid:{color:'#fce7ee'}},y:{ticks:{color:'#b08fa0',font:{size:10}},grid:{color:'#fce7ee'}}}}}
+
+// ---- DASHBOARD ----
+function renderDashboard(){
+  const all=DB.get('diet',{});
+  const td=all[todayStr()]||{meals:{breakfast:{cal:0},lunch:{cal:0},dinner:{cal:0},snack:{cal:0}},tdee:1500};
+  let intake=0;['breakfast','lunch','dinner','snack'].forEach(m=>intake+=Number(td.meals[m].cal)||0);
+  const exData=DB.get('exercise',{});
+  const tdEx=exData[todayStr()]||{cal:0,parts:[]};
+  const burn=(Number(td.tdee)||1500)+(tdEx.cal||0);
+  const gap=burn-intake;
+  $('#dIntake').innerHTML=intake+'<span class="unit">kcal</span>';
+  $('#dBurn').innerHTML=burn+'<span class="unit">kcal</span>';
+  $('#dGap').innerHTML=(gap>0?'+':'')+gap+'<span class="unit">kcal</span>';
+  $('#dGap').parentElement.className='stat '+(gap>0?'green':'orange');
+  const weight=DB.get('weight',{});
+  const wDates=Object.keys(weight).sort();
+  const lastW=wDates.length?weight[wDates[wDates.length-1]]:null;
+  $('#dWeight').innerHTML=lastW?(lastW.am||lastW.pm)+'<span class="unit">kg</span>':'—';
+  // exercise
+  $('#dashExercise').innerHTML=tdEx.parts.length?
+    `<div style="font-size:14px;margin-bottom:6px">${tdEx.parts.map(p=>'💪'+p).join(' ')}</div><div style="font-size:12px;color:var(--text2)">🔥 ${tdEx.cal||0}kcal · ⏱️ ${tdEx.min||0}分钟</div>`:
+    '<div class="empty-hint">今天还没锻炼哦</div>';
+  // meals
+  const mealEmojis={breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍪'};
+  const mealNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};
+  $('#dashMeals').innerHTML=['breakfast','lunch','dinner','snack'].map(m=>{
+    const meal=td.meals[m];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:20px">${mealEmojis[m]}</span>
+      <span style="flex:1;font-size:13.5px">${mealNames[m]}</span>
+      <span style="font-size:13px;color:var(--pink);font-weight:700">${meal.cal||0}kcal</span>
+    </div>`;
+  }).join('');
+  // charts
+  const dates=Object.keys(all).sort();
+  const last7=dates.slice(-7);
+  const ws7=last7.map(d=>{const w=weight[d];return w?(w.am||w.pm?Number(w.am||w.pm):null):null});
+  const gs7=last7.map(d=>{const dd=all[d];if(!dd)return 0;let s=0;['breakfast','lunch','dinner','snack'].forEach(m=>s+=Number(dd.meals[m].cal)||0);const exCal=exData[d]?exData[d].cal||0:0;return((Number(dd.tdee)||1500)+exCal)-s});
+  const wctx=$('#dashWeightChart').getContext('2d');
+  if(window.dwChart)window.dwChart.destroy();
+  window.dwChart=new Chart(wctx,{type:'line',data:{labels:last7.map(d=>d.slice(5)),datasets:[{label:'体重',data:ws7,borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.12)',fill:true,tension:.35,spanGaps:true}]},options:chartOpt()});
+  const gctx=$('#dashCalChart').getContext('2d');
+  if(window.dgChart)window.dgChart.destroy();
+  window.dgChart=new Chart(gctx,{type:'bar',data:{labels:last7.map(d=>d.slice(5)),datasets:[{label:'缺口',data:gs7,backgroundColor:'#34d399'}]},options:chartOpt()});
+}
+
+function renderAll(){
+  renderDashboard();renderDiet();renderWeight();renderExercise();renderStats();
+}
+
+$('#todayPill').textContent=todayCN();
+renderAll();
+</script>
+</body>
+</html>

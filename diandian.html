@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="今天有没有想点点">
+<title>今天有没有想点点 🐱</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#dbeafe 0%,#bfdbfe 25%,#93c5fd 55%,#60a5fa 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .heart-bg{position:absolute;font-size:20px;opacity:.35;animation:floatUp 9s linear infinite;pointer-events:none}
+  @keyframes floatUp{
+    0%{transform:translateY(100vh) rotate(0);opacity:0}
+    10%{opacity:.4}
+    90%{opacity:.3}
+    100%{transform:translateY(-100px) rotate(360deg);opacity:0}
+  }
+
+  .title{
+    font-size:23px;font-weight:800;color:#fff;text-align:center;
+    text-shadow:0 2px 12px rgba(59,130,246,.4);
+    margin-bottom:6px;z-index:2;letter-spacing:1px;
+  }
+  .subtitle{
+    font-size:13px;color:rgba(255,255,255,.9);margin-bottom:28px;z-index:2;
+    text-shadow:0 1px 6px rgba(59,130,246,.3);
+  }
+
+  .cat-container{
+    position:relative;z-index:2;margin-bottom:36px;
+    animation:idle 3s ease-in-out infinite;
+    cursor:pointer;
+  }
+  @keyframes idle{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+  }
+  .cat-container.happy{animation:happyJump .6s ease 3}
+  @keyframes happyJump{
+    0%,100%{transform:translateY(0) rotate(0)}
+    25%{transform:translateY(-24px) rotate(-6deg) scale(1.05)}
+    75%{transform:translateY(-24px) rotate(6deg) scale(1.05)}
+  }
+  .cat-svg{width:200px;height:200px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.12))}
+
+  .miss-btn{
+    background:linear-gradient(135deg,#60a5fa,#3b82f6);
+    color:#fff;border:none;
+    padding:16px 50px;border-radius:30px;
+    font-size:18px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 20px rgba(59,130,246,.4);
+    transition:.2s;z-index:2;letter-spacing:2px;
+    font-family:inherit;
+  }
+  .miss-btn:hover{filter:brightness(1.08)}
+  .miss-btn:active{transform:scale(.93)}
+  .miss-btn .btn-heart{display:inline-block;margin-right:6px;animation:beat 1s ease infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
+  .counter{
+    margin-top:18px;font-size:13px;color:rgba(255,255,255,.85);
+    z-index:2;text-shadow:0 1px 4px rgba(59,130,246,.3);
+  }
+
+  .popup-overlay{
+    position:fixed;inset:0;background:rgba(30,58,138,.25);
+    display:flex;align-items:center;justify-content:center;
+    z-index:100;opacity:0;pointer-events:none;
+    transition:opacity .3s;backdrop-filter:blur(6px);
+  }
+  .popup-overlay.show{opacity:1;pointer-events:auto}
+  .popup{
+    background:linear-gradient(180deg,#fff,#eff6ff);
+    border-radius:28px;padding:36px 30px 30px;
+    text-align:center;max-width:320px;width:85%;
+    box-shadow:0 20px 50px rgba(59,130,246,.3);
+    transform:scale(.7) translateY(20px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+    border:3px solid #bfdbfe;
+  }
+  .popup-overlay.show .popup{transform:scale(1) translateY(0)}
+  .popup-emoji{font-size:60px;margin-bottom:12px;animation:popIn .5s ease}
+  @keyframes popIn{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+  .popup-title{font-size:20px;font-weight:800;color:#3b82f6;margin-bottom:10px}
+  .popup-text{font-size:15px;color:#1e40af;line-height:1.6;margin-bottom:8px}
+  .popup-sub{font-size:13px;color:#2563eb;opacity:.7;margin-bottom:20px}
+  .popup-btn{
+    background:linear-gradient(135deg,#60a5fa,#3b82f6);
+    color:#fff;border:none;padding:12px 36px;border-radius:25px;
+    font-size:15px;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 14px rgba(59,130,246,.35);transition:.2s;
+    font-family:inherit;
+  }
+  .popup-btn:active{transform:scale(.95)}
+
+  .sparkle{
+    position:absolute;font-size:24px;pointer-events:none;
+    animation:sparkleAnim 1.2s ease-out forwards;z-index:50;
+  }
+  @keyframes sparkleAnim{
+    0%{opacity:1;transform:scale(0) rotate(0)}
+    50%{opacity:1;transform:scale(1.5) rotate(180deg)}
+    100%{opacity:0;transform:scale(.5) rotate(360deg) translateY(-60px)}
+  }
+  .footer{position:absolute;bottom:18px;font-size:11px;color:rgba(255,255,255,.6);z-index:2}
+</style>
+</head>
+<body>
+<div id="heartsBg"></div>
+
+<div class="title">今天有没有想点点</div>
+<div class="subtitle">🐱 点点小猫告诉它你想它啦～</div>
+
+<div class="cat-container" id="catContainer" onclick="petCat()">
+  <svg class="cat-svg" id="catSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- tail -->
+    <path d="M150 140 Q175 120 170 90 Q168 75 155 72" stroke="#a78bfa" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M150 140 Q175 120 170 90 Q168 75 155 72" stroke="#c4b5fd" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+    <!-- body -->
+    <ellipse cx="100" cy="145" rx="55" ry="42" fill="#c4b5fd"/>
+    <ellipse cx="100" cy="150" rx="40" ry="30" fill="#ddd6fe"/>
+
+    <!-- feet -->
+    <ellipse cx="75" cy="182" rx="14" ry="8" fill="#a78bfa"/>
+    <ellipse cx="125" cy="182" rx="14" ry="8" fill="#a78bfa"/>
+
+    <!-- head -->
+    <circle cx="100" cy="95" r="48" fill="#c4b5fd"/>
+
+    <!-- ears (outer) -->
+    <path d="M62 65 L52 30 L82 52 Z" fill="#a78bfa"/>
+    <path d="M138 65 L148 30 L118 52 Z" fill="#a78bfa"/>
+    <!-- ears (inner pink) -->
+    <path d="M66 60 L60 40 L76 52 Z" fill="#f9a8d4"/>
+    <path d="M134 60 L140 40 L124 52 Z" fill="#f9a8d4"/>
+
+    <!-- face white area -->
+    <ellipse cx="100" cy="108" rx="35" ry="28" fill="#ede9fe"/>
+
+    <!-- eyes - normal (closed when happy) -->
+    <g id="eyesNormal">
+      <ellipse cx="82" cy="92" rx="6" ry="8" fill="#1e1b4b"/>
+      <ellipse cx="118" cy="92" rx="6" ry="8" fill="#1e1b4b"/>
+      <circle cx="84" cy="89" r="2.5" fill="#fff"/>
+      <circle cx="120" cy="89" r="2.5" fill="#fff"/>
+    </g>
+    <!-- eyes - happy (hidden by default) -->
+    <g id="eyesHappy" style="display:none">
+      <path d="M76 92 Q82 86 88 92" stroke="#1e1b4b" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M112 92 Q118 86 124 92" stroke="#1e1b4b" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- blush -->
+    <ellipse cx="72" cy="108" rx="8" ry="5" fill="#f9a8d4" opacity=".6"/>
+    <ellipse cx="128" cy="108" rx="8" ry="5" fill="#f9a8d4" opacity=".6"/>
+
+    <!-- nose -->
+    <path d="M97 104 L103 104 L100 109 Z" fill="#f472b6"/>
+
+    <!-- mouth normal -->
+    <path id="mouthNormal" d="M100 109 Q95 115 90 112 M100 109 Q105 115 110 112" stroke="#9d174d" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- mouth happy -->
+    <path id="mouthHappy" d="M92 113 Q100 122 108 113" stroke="#9d174d" stroke-width="2.5" fill="none" stroke-linecap="round" style="display:none"/>
+
+    <!-- whiskers -->
+    <line x1="55" y1="102" x2="35" y2="98" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="55" y1="108" x2="35" y2="110" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="145" y1="102" x2="165" y2="98" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="145" y1="108" x2="165" y2="110" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- bow on head -->
+    <path d="M100 52 L88 44 L88 60 Z" fill="#60a5fa"/>
+    <path d="M100 52 L112 44 L112 60 Z" fill="#60a5fa"/>
+    <circle cx="100" cy="52" r="5" fill="#3b82f6"/>
+    <circle cx="100" cy="52" r="2" fill="#dbeafe"/>
+  </svg>
+</div>
+
+<button class="miss-btn" onclick="missHer()">
+  <span class="btn-heart">💙</span>想了
+</button>
+
+<div class="counter" id="counter">今天想了 0 次</div>
+
+<div class="footer"> made with 💙 for 你 & 点点 </div>
+
+<!-- popup -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup" onclick="event.stopPropagation()">
+    <div class="popup-emoji">🐱💙</div>
+    <div class="popup-title">点点也超级想你！</div>
+    <div class="popup-text">点点说：<br>"喵～收到你的想念啦！<br>我也一直在想你哦！"</div>
+    <div class="popup-sub">🌊 心意已传达 🌊</div>
+    <button class="popup-btn" onclick="closePopup()">好开心喵～</button>
+  </div>
+</div>
+
+<script>
+let count=Number(localStorage.getItem('ddMissCount')||0);
+let lastDate=localStorage.getItem('ddMissDate')||'';
+const today=new Date().toDateString();
+if(lastDate!==today){count=0;localStorage.setItem('ddMissDate',today)}
+updateCounter();
+
+function updateCounter(){
+  document.getElementById('counter').textContent='今天想了 '+count+' 次';
+}
+
+function missHer(){
+  count++;
+  localStorage.setItem('ddMissCount',count);
+  updateCounter();
+  makeHappy();
+  createSparkles();
+  setTimeout(()=>{document.getElementById('popupOverlay').classList.add('show')},350);
+}
+
+function closePopup(){
+  document.getElementById('popupOverlay').classList.remove('show');
+  // reset face after popup closes
+  setTimeout(resetFace,300);
+}
+
+function petCat(){
+  makeHappy();
+  createSparkles();
+}
+
+let happyTimer=null;
+function makeHappy(){
+  const cat=document.getElementById('catContainer');
+  cat.classList.add('happy');
+  // show happy face
+  document.getElementById('eyesNormal').style.display='none';
+  document.getElementById('eyesHappy').style.display='';
+  document.getElementById('mouthNormal').style.display='none';
+  document.getElementById('mouthHappy').style.display='';
+  clearTimeout(happyTimer);
+  happyTimer=setTimeout(()=>{
+    cat.classList.remove('happy');
+    if(!document.getElementById('popupOverlay').classList.contains('show'))resetFace();
+  },1800);
+}
+function resetFace(){
+  document.getElementById('eyesNormal').style.display='';
+  document.getElementById('eyesHappy').style.display='none';
+  document.getElementById('mouthNormal').style.display='';
+  document.getElementById('mouthHappy').style.display='none';
+}
+
+function createSparkles(){
+  const emojis=['💙','✨','💖','⭐','💫','🐱'];
+  const cat=document.getElementById('catContainer');
+  const rect=cat.getBoundingClientRect();
+  for(let i=0;i<8;i++){
+    const s=document.createElement('div');
+    s.className='sparkle';
+    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*150)+'px';
+    s.style.top=(rect.top+rect.height/2+(Math.random()-0.5)*100)+'px';
+    s.style.animationDelay=(i*0.08)+'s';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1500);
+  }
+}
+
+function createFloatingHeart(){
+  const h=document.createElement('div');
+  h.className='heart-bg';
+  const emojis=['💙','💕','✨','🐱','💫','⭐'];
+  h.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  h.style.left=Math.random()*100+'%';
+  h.style.fontSize=(14+Math.random()*16)+'px';
+  h.style.animationDuration=(6+Math.random()*4)+'s';
+  document.getElementById('heartsBg').appendChild(h);
+  setTimeout(()=>h.remove(),10000);
+}
+setInterval(createFloatingHeart,800);
+for(let i=0;i<5;i++)setTimeout(createFloatingHeart,i*200);
+</script>
+</body>
+</html>

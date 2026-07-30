@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="今天有没有想鲨鱼">
+<title>今天有没有想鲨鱼 🦈</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#fce7f3 0%,#fbcfe8 30%,#f9a8d4 60%,#ec4899 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .heart-bg{position:absolute;font-size:20px;opacity:.35;animation:floatUp 9s linear infinite;pointer-events:none}
+  @keyframes floatUp{
+    0%{transform:translateY(100vh) rotate(0);opacity:0}
+    10%{opacity:.4}
+    90%{opacity:.3}
+    100%{transform:translateY(-100px) rotate(360deg);opacity:0}
+  }
+  .bubble{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);pointer-events:none;animation:bubbleUp 6s linear infinite}
+  @keyframes bubbleUp{
+    0%{transform:translateY(0) scale(.5);opacity:0}
+    20%{opacity:.6}
+    100%{transform:translateY(-100vh) scale(1);opacity:0}
+  }
+
+  .title{
+    font-size:23px;font-weight:800;color:#fff;text-align:center;
+    text-shadow:0 2px 12px rgba(236,72,153,.4);
+    margin-bottom:6px;z-index:2;letter-spacing:1px;
+  }
+  .subtitle{
+    font-size:13px;color:rgba(255,255,255,.9);margin-bottom:24px;z-index:2;
+    text-shadow:0 1px 6px rgba(236,72,153,.3);
+  }
+
+  .shark-container{
+    position:relative;z-index:2;margin-bottom:34px;
+    animation:swim 3s ease-in-out infinite;
+    cursor:pointer;
+  }
+  @keyframes swim{
+    0%,100%{transform:translateX(-10px) translateY(0)}
+    50%{transform:translateX(10px) translateY(-6px)}
+  }
+  .shark-container.happy{animation:happyShake .6s ease 3}
+  @keyframes happyShake{
+    0%,100%{transform:translateX(0) rotate(0)}
+    25%{transform:translateX(-15px) rotate(-5deg) scale(1.05)}
+    75%{transform:translateX(15px) rotate(5deg) scale(1.05)}
+  }
+  .shark-svg{width:220px;height:180px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.12))}
+
+  /* tail wag */
+  #sharkTail{transform-origin:155px 95px;animation:wag 1.5s ease-in-out infinite}
+  @keyframes wag{
+    0%,100%{transform:rotate(0)}
+    50%{transform:rotate(15deg)}
+  }
+  .shark-container.happy #sharkTail{animation:wagFast .25s ease infinite}
+  @keyframes wagFast{
+    0%,100%{transform:rotate(-20deg)}
+    50%{transform:rotate(25deg)}
+  }
+
+  .miss-btn{
+    background:linear-gradient(135deg,#f472b6,#ec4899);
+    color:#fff;border:none;
+    padding:16px 50px;border-radius:30px;
+    font-size:18px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 20px rgba(236,72,153,.4);
+    transition:.2s;z-index:2;letter-spacing:2px;
+    font-family:inherit;
+  }
+  .miss-btn:hover{filter:brightness(1.08)}
+  .miss-btn:active{transform:scale(.93)}
+  .miss-btn .btn-heart{display:inline-block;margin-right:6px;animation:beat 1s ease infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
+  .counter{
+    margin-top:18px;font-size:13px;color:rgba(255,255,255,.85);
+    z-index:2;text-shadow:0 1px 4px rgba(236,72,153,.3);
+  }
+
+  .popup-overlay{
+    position:fixed;inset:0;background:rgba(131,24,67,.25);
+    display:flex;align-items:center;justify-content:center;
+    z-index:100;opacity:0;pointer-events:none;
+    transition:opacity .3s;backdrop-filter:blur(6px);
+  }
+  .popup-overlay.show{opacity:1;pointer-events:auto}
+  .popup{
+    background:linear-gradient(180deg,#fff,#fdf2f8);
+    border-radius:28px;padding:36px 30px 30px;
+    text-align:center;max-width:320px;width:85%;
+    box-shadow:0 20px 50px rgba(236,72,153,.3);
+    transform:scale(.7) translateY(20px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+    border:3px solid #fbcfe8;
+  }
+  .popup-overlay.show .popup{transform:scale(1) translateY(0)}
+  .popup-emoji{font-size:60px;margin-bottom:12px;animation:popIn .5s ease}
+  @keyframes popIn{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+  .popup-title{font-size:20px;font-weight:800;color:#ec4899;margin-bottom:10px}
+  .popup-text{font-size:15px;color:#9d174d;line-height:1.6;margin-bottom:8px}
+  .popup-sub{font-size:13px;color:#be185d;opacity:.7;margin-bottom:20px}
+  .popup-btn{
+    background:linear-gradient(135deg,#f472b6,#ec4899);
+    color:#fff;border:none;padding:12px 36px;border-radius:25px;
+    font-size:15px;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 14px rgba(236,72,153,.35);transition:.2s;
+    font-family:inherit;
+  }
+  .popup-btn:active{transform:scale(.95)}
+
+  .sparkle{
+    position:absolute;font-size:24px;pointer-events:none;
+    animation:sparkleAnim 1.2s ease-out forwards;z-index:50;
+  }
+  @keyframes sparkleAnim{
+    0%{opacity:1;transform:scale(0) rotate(0)}
+    50%{opacity:1;transform:scale(1.5) rotate(180deg)}
+    100%{opacity:0;transform:scale(.5) rotate(360deg) translateY(-60px)}
+  }
+  .footer{position:absolute;bottom:18px;font-size:11px;color:rgba(255,255,255,.6);z-index:2}
+</style>
+</head>
+<body>
+<div id="heartsBg"></div>
+<div id="bubblesBg"></div>
+
+<div class="title">今天有没有想鲨鱼</div>
+<div class="subtitle">🦈 点点小鲨鱼告诉它你想它啦～</div>
+
+<div class="shark-container" id="sharkContainer" onclick="petShark()">
+  <svg class="shark-svg" viewBox="0 0 220 180" xmlns="http://www.w3.org/2000/svg">
+    <!-- tail -->
+    <g id="sharkTail">
+      <path d="M155 95 L200 55 L190 95 L200 135 Z" fill="#f9a8d4"/>
+      <path d="M155 95 L195 70 L188 95 L195 120 Z" fill="#fbcfe8"/>
+    </g>
+
+    <!-- body (main) -->
+    <ellipse cx="100" cy="95" rx="62" ry="40" fill="#f9a8d4"/>
+    <!-- belly -->
+    <ellipse cx="100" cy="108" rx="50" ry="28" fill="#fce7f3"/>
+
+    <!-- top fin -->
+    <path d="M95 55 L110 20 L125 55 Z" fill="#f472b6"/>
+    <!-- side fin -->
+    <path d="M80 115 Q60 135 55 125 Q60 118 75 112 Z" fill="#f472b6"/>
+    <!-- bottom fin -->
+    <path d="M115 130 L130 145 L120 130 Z" fill="#f472b6"/>
+
+    <!-- face area -->
+    <ellipse cx="55" cy="88" rx="25" ry="22" fill="#fbcfe8"/>
+
+    <!-- eyes normal -->
+    <g id="eyesNormal">
+      <ellipse cx="50" cy="82" rx="5" ry="7" fill="#1f2937"/>
+      <ellipse cx="72" cy="82" rx="5" ry="7" fill="#1f2937"/>
+      <circle cx="52" cy="79" r="2" fill="#fff"/>
+      <circle cx="74" cy="79" r="2" fill="#fff"/>
+    </g>
+    <!-- eyes happy (^_^) -->
+    <g id="eyesHappy" style="display:none">
+      <path d="M44 83 Q50 76 56 83" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M66 83 Q72 76 78 83" stroke="#1f2937" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- blush -->
+    <ellipse cx="42" cy="96" rx="7" ry="4.5" fill="#fb7185" opacity=".5"/>
+    <ellipse cx="80" cy="96" rx="7" ry="4.5" fill="#fb7185" opacity=".5"/>
+
+    <!-- mouth normal (small smile) -->
+    <path id="mouthNormal" d="M52 100 Q58 104 64 100" stroke="#9d174d" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- mouth happy (big open smile) -->
+    <path id="mouthHappy" d="M48 98 Q58 112 68 98 Q63 106 58 106 Q53 106 48 98" fill="#fb7185" stroke="#9d174d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"/>
+
+    <!-- teeth (cute little tooth) -->
+    <path id="tooth" d="M55 101 L57 105 L59 101" fill="#fff" style="display:none"/>
+
+    <!-- gills -->
+    <path d="M88 80 Q85 95 88 110" stroke="#f472b6" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M96 78 Q93 95 96 112" stroke="#f472b6" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+    <!-- water sparkles on body -->
+    <circle cx="120" cy="80" r="3" fill="#fff" opacity=".6"/>
+    <circle cx="135" cy="92" r="2" fill="#fff" opacity=".5"/>
+    <circle cx="115" cy="105" r="2.5" fill="#fff" opacity=".5"/>
+
+    <!-- bow on head -->
+    <path d="M108 38 L96 30 L96 46 Z" fill="#ec4899"/>
+    <path d="M108 38 L120 30 L120 46 Z" fill="#ec4899"/>
+    <circle cx="108" cy="38" r="4" fill="#be185d"/>
+    <circle cx="108" cy="38" r="1.5" fill="#fbcfe8"/>
+  </svg>
+</div>
+
+<button class="miss-btn" onclick="missShark()">
+  <span class="btn-heart">💗</span>想了
+</button>
+
+<div class="counter" id="counter">今天想了 0 次</div>
+
+<div class="footer"> made with 💕 for 你 & 鲨鱼 </div>
+
+<!-- popup -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup" onclick="event.stopPropagation()">
+    <div class="popup-emoji">🦈💗</div>
+    <div class="popup-title">鲨鱼也超级想你！</div>
+    <div class="popup-text">鲨鱼说：<br>"游了好多好多公里～<br>就为了来见你呀！"</div>
+    <div class="popup-sub">🫧 心意已传达 🫧</div>
+    <button class="popup-btn" onclick="closePopup()">好开心呀～</button>
+  </div>
+</div>
+
+<script>
+let count=Number(localStorage.getItem('sharkMissCount')||0);
+let lastDate=localStorage.getItem('sharkMissDate')||'';
+const today=new Date().toDateString();
+if(lastDate!==today){count=0;localStorage.setItem('sharkMissDate',today)}
+updateCounter();
+
+function updateCounter(){
+  document.getElementById('counter').textContent='今天想了 '+count+' 次';
+}
+
+function missShark(){
+  count++;
+  localStorage.setItem('sharkMissCount',count);
+  updateCounter();
+  makeHappy();
+  createSparkles();
+  createBubbles();
+  setTimeout(()=>{document.getElementById('popupOverlay').classList.add('show')},350);
+}
+
+function closePopup(){
+  document.getElementById('popupOverlay').classList.remove('show');
+  setTimeout(resetFace,300);
+}
+
+function petShark(){
+  makeHappy();
+  createSparkles();
+  createBubbles();
+}
+
+let happyTimer=null;
+function makeHappy(){
+  const shark=document.getElementById('sharkContainer');
+  shark.classList.add('happy');
+  document.getElementById('eyesNormal').style.display='none';
+  document.getElementById('eyesHappy').style.display='';
+  document.getElementById('mouthNormal').style.display='none';
+  document.getElementById('mouthHappy').style.display='';
+  document.getElementById('tooth').style.display='';
+  clearTimeout(happyTimer);
+  happyTimer=setTimeout(()=>{
+    shark.classList.remove('happy');
+    if(!document.getElementById('popupOverlay').classList.contains('show'))resetFace();
+  },2000);
+}
+function resetFace(){
+  document.getElementById('eyesNormal').style.display='';
+  document.getElementById('eyesHappy').style.display='none';
+  document.getElementById('mouthNormal').style.display='';
+  document.getElementById('mouthHappy').style.display='none';
+  document.getElementById('tooth').style.display='none';
+}
+
+function createSparkles(){
+  const emojis=['💗','✨','💖','🫧','💫','🦈'];
+  const shark=document.getElementById('sharkContainer');
+  const rect=shark.getBoundingClientRect();
+  for(let i=0;i<8;i++){
+    const s=document.createElement('div');
+    s.className='sparkle';
+    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*160)+'px';
+    s.style.top=(rect.top+rect.height/2+(Math.random()-0.5)*100)+'px';
+    s.style.animationDelay=(i*0.08)+'s';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1500);
+  }
+}
+
+function createBubbles(){
+  const shark=document.getElementById('sharkContainer');
+  const rect=shark.getBoundingClientRect();
+  for(let i=0;i<6;i++){
+    const b=document.createElement('div');
+    b.className='sparkle';
+    b.textContent='🫧';
+    b.style.fontSize=(16+Math.random()*14)+'px';
+    b.style.left=(rect.left+Math.random()*rect.width)+'px';
+    b.style.top=(rect.bottom-20)+'px';
+    b.style.animationDelay=(i*0.1)+'s';
+    document.body.appendChild(b);
+    setTimeout(()=>b.remove(),1500);
+  }
+}
+
+function createFloatingHeart(){
+  const h=document.createElement('div');
+  h.className='heart-bg';
+  const emojis=['💗','💕','✨','🫧','💫','🦈'];
+  h.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  h.style.left=Math.random()*100+'%';
+  h.style.fontSize=(14+Math.random()*16)+'px';
+  h.style.animationDuration=(6+Math.random()*4)+'s';
+  document.getElementById('heartsBg').appendChild(h);
+  setTimeout(()=>h.remove(),10000);
+}
+
+function createBgBubble(){
+  const b=document.createElement('div');
+  b.className='bubble';
+  const size=8+Math.random()*20;
+  b.style.width=size+'px';
+  b.style.height=size+'px';
+  b.style.left=Math.random()*100+'%';
+  b.style.bottom='0';
+  b.style.animationDuration=(4+Math.random()*4)+'s';
+  document.getElementById('bubblesBg').appendChild(b);
+  setTimeout(()=>b.remove(),8000);
+}
+
+setInterval(createFloatingHeart,800);
+setInterval(createBgBubble,600);
+for(let i=0;i<5;i++){setTimeout(createFloatingHeart,i*200);setTimeout(createBgBubble,i*300)}
+</script>
+</body>
+</html>
