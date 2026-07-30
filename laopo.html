@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="今天也在想老婆">
+<title>今天也在想老婆 🐰</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#fdf2f8 0%,#fce7f3 20%,#fbcfe8 45%,#f9a8d4 70%,#f472b6 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .heart-bg{position:absolute;font-size:20px;opacity:.35;animation:floatUp 9s linear infinite;pointer-events:none}
+  @keyframes floatUp{
+    0%{transform:translateY(100vh) rotate(0);opacity:0}
+    10%{opacity:.4}
+    90%{opacity:.3}
+    100%{transform:translateY(-100px) rotate(360deg);opacity:0}
+  }
+  .flower-bg{position:absolute;font-size:18px;opacity:.2;animation:floatFlower 14s linear infinite;pointer-events:none}
+  @keyframes floatFlower{
+    0%{transform:translateY(100vh) rotate(0);opacity:0}
+    10%{opacity:.22}
+    90%{opacity:.18}
+    100%{transform:translateY(-100px) rotate(360deg);opacity:0}
+  }
+
+  .title{
+    font-size:23px;font-weight:800;color:#fff;text-align:center;
+    text-shadow:0 2px 12px rgba(236,72,153,.4);
+    margin-bottom:6px;z-index:2;letter-spacing:1px;
+  }
+  .subtitle{
+    font-size:13px;color:rgba(255,255,255,.9);margin-bottom:20px;z-index:2;
+    text-shadow:0 1px 6px rgba(236,72,153,.3);
+  }
+
+  .rabbit-container{
+    position:relative;z-index:2;margin-bottom:30px;
+    animation:idle 3s ease-in-out infinite;
+    cursor:pointer;
+  }
+  @keyframes idle{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+  }
+  .rabbit-container.happy{animation:happyJump .5s ease 3}
+  @keyframes happyJump{
+    0%,100%{transform:translateY(0) rotate(0)}
+    25%{transform:translateY(-26px) rotate(-5deg) scale(1.05)}
+    75%{transform:translateY(-26px) rotate(5deg) scale(1.05)}
+  }
+  .rabbit-svg{width:200px;height:240px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.12))}
+
+  /* ear animations */
+  #earLeft{transform-origin:80px 60px;animation:earWiggleL 2.5s ease-in-out infinite}
+  @keyframes earWiggleL{
+    0%,100%{transform:rotate(0)}
+    50%{transform:rotate(-8deg)}
+  }
+  #earRight{transform-origin:120px 60px;animation:earWiggleR 2.5s ease-in-out infinite}
+  @keyframes earWiggleR{
+    0%,100%{transform:rotate(0)}
+    50%{transform:rotate(8deg)}
+  }
+  .rabbit-container.happy #earLeft{animation:earFastL .3s ease infinite}
+  @keyframes earFastL{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(10deg)}}
+  .rabbit-container.happy #earRight{animation:earFastR .3s ease infinite}
+  @keyframes earFastR{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-10deg)}}
+
+  /* tail wag */
+  #rabbitTail{transform-origin:148px 165px;animation:tailWag 1.8s ease-in-out infinite}
+  @keyframes tailWag{
+    0%,100%{transform:rotate(-12deg)}
+    50%{transform:rotate(15deg)}
+  }
+  .rabbit-container.happy #rabbitTail{animation:tailFast .25s ease infinite}
+  @keyframes tailFast{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(35deg)}}
+
+  .miss-btn{
+    background:linear-gradient(135deg,#f472b6,#ec4899);
+    color:#fff;border:none;
+    padding:16px 50px;border-radius:30px;
+    font-size:18px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 20px rgba(236,72,153,.4);
+    transition:.2s;z-index:2;letter-spacing:2px;
+    font-family:inherit;
+  }
+  .miss-btn:hover{filter:brightness(1.08)}
+  .miss-btn:active{transform:scale(.93)}
+  .miss-btn .btn-heart{display:inline-block;margin-right:6px;animation:beat 1s ease infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
+  .counter{
+    margin-top:18px;font-size:13px;color:rgba(255,255,255,.85);
+    z-index:2;text-shadow:0 1px 4px rgba(236,72,153,.3);
+  }
+
+  .popup-overlay{
+    position:fixed;inset:0;background:rgba(131,24,67,.25);
+    display:flex;align-items:center;justify-content:center;
+    z-index:100;opacity:0;pointer-events:none;
+    transition:opacity .3s;backdrop-filter:blur(6px);
+  }
+  .popup-overlay.show{opacity:1;pointer-events:auto}
+  .popup{
+    background:linear-gradient(180deg,#fff,#fdf2f8);
+    border-radius:28px;padding:36px 30px 30px;
+    text-align:center;max-width:320px;width:85%;
+    box-shadow:0 20px 50px rgba(236,72,153,.3);
+    transform:scale(.7) translateY(20px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+    border:3px solid #fbcfe8;
+  }
+  .popup-overlay.show .popup{transform:scale(1) translateY(0)}
+  .popup-emoji{font-size:60px;margin-bottom:12px;animation:popIn .5s ease}
+  @keyframes popIn{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+  .popup-title{font-size:20px;font-weight:800;color:#ec4899;margin-bottom:10px}
+  .popup-text{font-size:15px;color:#9d174d;line-height:1.6;margin-bottom:8px}
+  .popup-sub{font-size:13px;color:#be185d;opacity:.7;margin-bottom:20px}
+  .popup-btn{
+    background:linear-gradient(135deg,#f472b6,#ec4899);
+    color:#fff;border:none;padding:12px 36px;border-radius:25px;
+    font-size:15px;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 14px rgba(236,72,153,.35);transition:.2s;
+    font-family:inherit;
+  }
+  .popup-btn:active{transform:scale(.95)}
+
+  .sparkle{
+    position:absolute;font-size:24px;pointer-events:none;
+    animation:sparkleAnim 1.2s ease-out forwards;z-index:50;
+  }
+  @keyframes sparkleAnim{
+    0%{opacity:1;transform:scale(0) rotate(0)}
+    50%{opacity:1;transform:scale(1.5) rotate(180deg)}
+    100%{opacity:0;transform:scale(.5) rotate(360deg) translateY(-60px)}
+  }
+  .footer{position:absolute;bottom:18px;font-size:11px;color:rgba(255,255,255,.6);z-index:2}
+</style>
+</head>
+<body>
+<div id="heartsBg"></div>
+<div id="flowersBg"></div>
+
+<div class="title">今天也在想老婆</div>
+<div class="subtitle">🐰 点点小兔告诉老婆你想她啦～</div>
+
+<div class="rabbit-container" id="rabbitContainer" onclick="petRabbit()">
+  <svg class="rabbit-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <!-- ears -->
+    <g id="earLeft">
+      <ellipse cx="78" cy="35" rx="13" ry="38" fill="#fce7f3" stroke="#f9a8d4" stroke-width="2"/>
+      <ellipse cx="78" cy="38" rx="7" ry="28" fill="#fbcfe8"/>
+    </g>
+    <g id="earRight">
+      <ellipse cx="122" cy="35" rx="13" ry="38" fill="#fce7f3" stroke="#f9a8d4" stroke-width="2"/>
+      <ellipse cx="122" cy="38" rx="7" ry="28" fill="#fbcfe8"/>
+    </g>
+
+    <!-- head -->
+    <circle cx="100" cy="100" r="48" fill="#fff"/>
+    <circle cx="100" cy="100" r="48" fill="#fce7f3" opacity=".3"/>
+
+    <!-- body -->
+    <ellipse cx="100" cy="170" rx="42" ry="38" fill="#fff"/>
+    <ellipse cx="100" cy="172" rx="32" ry="28" fill="#fce7f3" opacity=".3"/>
+
+    <!-- feet -->
+    <ellipse cx="78" cy="200" rx="13" ry="8" fill="#fbcfe8"/>
+    <ellipse cx="122" cy="200" rx="13" ry="8" fill="#fbcfe8"/>
+
+    <!-- arms -->
+    <ellipse cx="65" cy="160" rx="10" ry="15" fill="#fbcfe8" transform="rotate(-15 65 160)"/>
+    <ellipse cx="135" cy="160" rx="10" ry="15" fill="#fbcfe8" transform="rotate(15 135 160)"/>
+
+    <!-- tail (pom-pom) -->
+    <g id="rabbitTail">
+      <circle cx="148" cy="165" r="14" fill="#fff"/>
+      <circle cx="145" cy="162" r="5" fill="#fce7f3" opacity=".5"/>
+      <circle cx="151" cy="168" r="3" fill="#fce7f3" opacity=".4"/>
+    </g>
+
+    <!-- face area -->
+    <!-- blush -->
+    <ellipse cx="75" cy="115" rx="9" ry="6" fill="#fb7185" opacity=".4"/>
+    <ellipse cx="125" cy="115" rx="9" ry="6" fill="#fb7185" opacity=".4"/>
+
+    <!-- eyes normal -->
+    <g id="eyesNormal">
+      <ellipse cx="83" cy="100" rx="6" ry="8" fill="#1f2937"/>
+      <ellipse cx="117" cy="100" rx="6" ry="8" fill="#1f2937"/>
+      <circle cx="85" cy="97" r="2.5" fill="#fff"/>
+      <circle cx="119" cy="97" r="2.5" fill="#fff"/>
+    </g>
+    <!-- eyes happy -->
+    <g id="eyesHappy" style="display:none">
+      <path d="M77 101 Q83 94 89 101" stroke="#1f2937" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M111 101 Q117 94 123 101" stroke="#1f2937" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- nose -->
+    <path d="M96 112 L104 112 L100 117 Z" fill="#ec4899"/>
+
+    <!-- mouth normal -->
+    <path id="mouthNormal" d="M100 117 Q95 122 90 120 M100 117 Q105 122 110 120" stroke="#9d174d" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- mouth happy -->
+    <path id="mouthHappy" d="M92 118 Q100 128 108 118 Q104 124 100 124 Q96 124 92 118" fill="#fb7185" stroke="#9d174d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"/>
+
+    <!-- whiskers -->
+    <line x1="62" y1="110" x2="42" y2="106" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="62" y1="116" x2="42" y2="118" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="138" y1="110" x2="158" y2="106" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="138" y1="116" x2="158" y2="118" stroke="#f9a8d4" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- bow on head -->
+    <path d="M100 68 L88 60 L88 76 Z" fill="#ec4899"/>
+    <path d="M100 68 L112 60 L112 76 Z" fill="#ec4899"/>
+    <circle cx="100" cy="68" r="5" fill="#be185d"/>
+    <circle cx="100" cy="68" r="2" fill="#fbcfe8"/>
+
+    <!-- flower on body -->
+    <text x="95" y="175" font-size="14">🌸</text>
+  </svg>
+</div>
+
+<button class="miss-btn" onclick="missHer()">
+  <span class="btn-heart">💗</span>想了
+</button>
+
+<div class="counter" id="counter">今天想了 0 次</div>
+
+<div class="footer"> made with 💕 for 逍乂 & 老婆 </div>
+
+<!-- popup -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup" onclick="event.stopPropagation()">
+    <div class="popup-emoji">🐰💗</div>
+    <div class="popup-title">逍乂也很想你！爱你老婆</div>
+    <div class="popup-text">小兔说：<br>"收到你的想念啦！<br>摇摇尾巴动动耳朵，逍乂也一直在想你哦！爱你老婆！"</div>
+    <div class="popup-sub">💕 心意已传达 💕</div>
+    <button class="popup-btn" onclick="closePopup()">我也爱你呀～</button>
+  </div>
+</div>
+
+<script>
+let count=Number(localStorage.getItem('laopoMissCount')||0);
+let lastDate=localStorage.getItem('laopoMissDate')||'';
+const today=new Date().toDateString();
+if(lastDate!==today){count=0;localStorage.setItem('xhMissDate',today)}
+updateCounter();
+
+function updateCounter(){
+  document.getElementById('counter').textContent='今天想了 '+count+' 次';
+}
+
+function missHer(){
+  count++;
+  localStorage.setItem('laopoMissCount',count);
+  updateCounter();
+  makeHappy();
+  createSparkles();
+  setTimeout(()=>{document.getElementById('popupOverlay').classList.add('show')},350);
+}
+
+function closePopup(){
+  document.getElementById('popupOverlay').classList.remove('show');
+  setTimeout(resetFace,300);
+}
+
+function petRabbit(){
+  makeHappy();
+  createSparkles();
+}
+
+let happyTimer=null;
+function makeHappy(){
+  const rabbit=document.getElementById('rabbitContainer');
+  rabbit.classList.add('happy');
+  document.getElementById('eyesNormal').style.display='none';
+  document.getElementById('eyesHappy').style.display='';
+  document.getElementById('mouthNormal').style.display='none';
+  document.getElementById('mouthHappy').style.display='';
+  clearTimeout(happyTimer);
+  happyTimer=setTimeout(()=>{
+    rabbit.classList.remove('happy');
+    if(!document.getElementById('popupOverlay').classList.contains('show'))resetFace();
+  },2000);
+}
+function resetFace(){
+  document.getElementById('eyesNormal').style.display='';
+  document.getElementById('eyesHappy').style.display='none';
+  document.getElementById('mouthNormal').style.display='';
+  document.getElementById('mouthHappy').style.display='none';
+}
+
+function createSparkles(){
+  const emojis=['💗','✨','💖','🌸','💫','🐰','💕','🌷'];
+  const rabbit=document.getElementById('rabbitContainer');
+  const rect=rabbit.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const s=document.createElement('div');
+    s.className='sparkle';
+    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*170)+'px';
+    s.style.top=(rect.top+rect.height/2+(Math.random()-0.5)*120)+'px';
+    s.style.animationDelay=(i*0.07)+'s';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1500);
+  }
+}
+
+function createFloatingHeart(){
+  const h=document.createElement('div');
+  h.className='heart-bg';
+  const emojis=['💗','💕','✨','🌸','💫','🐰','🌷'];
+  h.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  h.style.left=Math.random()*100+'%';
+  h.style.fontSize=(14+Math.random()*16)+'px';
+  h.style.animationDuration=(6+Math.random()*4)+'s';
+  document.getElementById('heartsBg').appendChild(h);
+  setTimeout(()=>h.remove(),10000);
+}
+
+function createFloatingFlower(){
+  const f=document.createElement('div');
+  f.className='flower-bg';
+  f.textContent='🌸';
+  f.style.left=Math.random()*100+'%';
+  f.style.fontSize=(12+Math.random()*10)+'px';
+  f.style.animationDuration=(10+Math.random()*6)+'s';
+  document.getElementById('flowersBg').appendChild(f);
+  setTimeout(()=>f.remove(),16000);
+}
+
+setInterval(createFloatingHeart,650);
+setInterval(createFloatingFlower,1000);
+for(let i=0;i<5;i++){setTimeout(createFloatingHeart,i*200);setTimeout(createFloatingFlower,i*400)}
+</script>
+</body>
+</html>
