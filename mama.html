@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="妈妈吃药了么">
+<title>妈妈，今天吃药了么 💊</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow-x:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#fef3c7 0%,#fde68a 30%,#fbbf24 100%);
+    color:#1f2937;font-size:18px;line-height:1.5;
+  }
+
+  /* Top search bar */
+  .topbar{
+    display:flex;align-items:center;gap:10px;padding:12px 16px;
+    background:#fff;border-bottom:3px solid #f59e0b;
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .icon{font-size:28px}
+  .topbar .title{font-size:20px;font-weight:800;color:#92400e;flex:1}
+  .search-wrap{position:relative;flex:0 0 auto}
+  .search-wrap input{
+    width:140px;padding:8px 12px 8px 36px;font-size:16px;
+    border:2px solid #fde68a;border-radius:25px;background:#fffbeb;outline:none;
+  }
+  .search-wrap input:focus{border-color:#f59e0b}
+  .search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.5}
+
+  .container{padding:16px;max-width:600px;margin:0 auto;padding-bottom:40px}
+
+  /* Date banner */
+  .date-banner{
+    background:#fff;border-radius:20px;padding:16px 20px;margin-bottom:16px;
+    text-align:center;border:3px solid #fbbf24;
+  }
+  .date-banner .day{font-size:32px;font-weight:900;color:#92400e}
+  .date-banner .date{font-size:16px;color:#78716c;margin-top:4px}
+
+  /* Big status card */
+  .status-card{
+    background:#fff;border-radius:24px;padding:24px;margin-bottom:16px;
+    border:4px solid #fbbf24;text-align:center;
+  }
+  .status-card.done{border-color:#22c55e;background:#f0fdf4}
+  .status-card.partial{border-color:#f59e0b;background:#fffbeb}
+  .status-card.none{border-color:#ef4444;background:#fef2f2}
+
+  .status-emoji{font-size:64px;line-height:1;margin-bottom:8px}
+  .status-text{font-size:28px;font-weight:900;margin-bottom:6px}
+  .status-card.done .status-text{color:#16a34a}
+  .status-card.partial .status-text{color:#d97706}
+  .status-card.none .status-text{color:#dc2626}
+  .status-sub{font-size:16px;color:#78716c}
+
+  /* Quick stats */
+  .stats-row{display:flex;gap:10px;margin-bottom:16px}
+  .stat-box{
+    flex:1;background:#fff;border-radius:16px;padding:14px;text-align:center;
+    border:2px solid #fde68a;
+  }
+  .stat-box .num{font-size:36px;font-weight:900;color:#92400e;line-height:1}
+  .stat-box .lbl{font-size:14px;color:#78716c;margin-top:4px}
+
+  /* Medicine list */
+  .med-card{
+    background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;
+    border:3px solid #e5e7eb;transition:.2s;
+  }
+  .med-card.taken{border-color:#22c55e;background:#f0fdf4}
+  .med-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .med-head .med-emoji{font-size:36px}
+  .med-head .med-info{flex:1}
+  .med-head .med-name{font-size:22px;font-weight:800;color:#1f2937}
+  .med-head .med-dose{font-size:15px;color:#78716c;margin-top:2px}
+  .med-head .med-count{font-size:14px;color:#92400e;font-weight:700;background:#fef3c7;padding:4px 10px;border-radius:12px}
+
+  /* Time slots */
+  .time-slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .time-slot{
+    flex:1;min-width:80px;padding:16px 8px;border-radius:16px;
+    text-align:center;cursor:pointer;border:3px solid #e5e7eb;background:#fff;
+    transition:.15s;
+  }
+  .time-slot:active{transform:scale(.95)}
+  .time-slot.taken{border-color:#22c55e;background:#dcfce7}
+  .time-slot .ts-icon{font-size:32px;line-height:1}
+  .time-slot .ts-label{font-size:15px;font-weight:700;margin-top:6px;color:#1f2937}
+  .time-slot .ts-status{font-size:13px;margin-top:2px;color:#78716c}
+  .time-slot.taken .ts-status{color:#16a34a;font-weight:700}
+
+  /* Big check button */
+  .check-btn{
+    width:100%;padding:20px;border:none;border-radius:20px;
+    font-size:22px;font-weight:800;cursor:pointer;transition:.15s;
+    font-family:inherit;margin-top:10px;
+  }
+  .check-btn:active{transform:scale(.97)}
+  .check-btn.take{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 14px rgba(34,197,94,.3)}
+  .check-btn.undo{background:#fef3c7;color:#92400e;border:2px solid #fbbf24}
+
+  /* Add medicine */
+  .add-card{background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;border:3px dashed #fbbf24}
+  .add-card h3{font-size:20px;font-weight:800;color:#92400e;margin-bottom:12px}
+  .add-card input,.add-card select{
+    width:100%;padding:14px;font-size:18px;border:2px solid #fde68a;
+    border-radius:14px;margin-bottom:10px;outline:none;background:#fffbeb;
+  }
+  .add-card input:focus,.add-card select:focus{border-color:#f59e0b}
+  .add-card label{font-size:15px;color:#78716c;font-weight:700;display:block;margin-bottom:6px;margin-top:4px}
+  .time-picker-row{display:flex;gap:8px;margin-bottom:10px}
+  .time-picker-row .time-chip{
+    flex:1;padding:12px;border-radius:14px;border:2px solid #fde68a;
+    text-align:center;font-size:16px;font-weight:700;cursor:pointer;background:#fffbeb;
+  }
+  .time-picker-row .time-chip.selected{background:#fbbf24;color:#fff;border-color:#f59e0b}
+  .add-btn{
+    width:100%;padding:16px;background:linear-gradient(135deg,#f59e0b,#d97706);
+    color:#fff;border:none;border-radius:16px;font-size:20px;font-weight:800;
+    cursor:pointer;font-family:inherit;
+  }
+  .add-btn:active{transform:scale(.97)}
+
+  .del-btn{
+    background:none;border:none;color:#ef4444;font-size:14px;cursor:pointer;
+    padding:4px 8px;margin-top:6px;
+  }
+
+  /* Reminder section */
+  .reminder-card{background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;border:3px solid #e5e7eb}
+  .reminder-card h3{font-size:20px;font-weight:800;color:#92400e;margin-bottom:10px}
+  .reminder-toggle{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .reminder-toggle .r-label{flex:1;font-size:18px;font-weight:700}
+  .switch{position:relative;width:56px;height:30px;cursor:pointer}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .slider{position:absolute;inset:0;background:#d1d5db;border-radius:30px;transition:.2s}
+  .switch .slider:before{content:'';position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked+.slider{background:#22c55e}
+  .switch input:checked+.slider:before{transform:translateX(26px)}
+
+  .section-title{
+    font-size:22px;font-weight:900;color:#92400e;margin:20px 0 12px;
+    display:flex;align-items:center;gap:8px;
+  }
+
+  /* Empty state */
+  .empty{text-align:center;padding:40px 20px;color:#78716c}
+  .empty .emoji{font-size:48px;margin-bottom:8px}
+
+  /* History */
+  .history-item{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-radius:14px;margin-bottom:8px;border:2px solid #fde68a}
+  .history-item .h-date{font-size:16px;font-weight:700;color:#92400e;flex:1}
+  .history-item .h-status{font-size:15px;font-weight:700}
+  .history-item .h-status.full{color:#16a34a}
+  .history-item .h-status.partial{color:#d97706}
+  .history-item .h-status.none{color:#dc2626}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="icon">💊</span>
+  <span class="title">妈妈吃药了么</span>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="搜药名" oninput="filterMeds()">
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Date -->
+  <div class="date-banner">
+    <div class="day" id="todayDay"></div>
+    <div class="date" id="todayDate"></div>
+  </div>
+
+  <!-- Big Status -->
+  <div class="status-card none" id="statusCard">
+    <div class="status-emoji" id="statusEmoji">❓</div>
+    <div class="status-text" id="statusText">还没吃药</div>
+    <div class="status-sub" id="statusSub">点击下方按钮记录吃药</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="num" id="statTotal">0</div><div class="lbl">药品种类</div></div>
+    <div class="stat-box"><div class="num" id="statTaken">0</div><div class="lbl">今日已吃</div></div>
+    <div class="stat-box"><div class="num" id="statRemain">0</div><div class="lbl">今日待吃</div></div>
+    <div class="stat-box"><div class="num" id="statStreak">0</div><div class="lbl">连续天数</div></div>
+  </div>
+
+  <!-- Medicines -->
+  <div class="section-title">📋 今天的药</div>
+  <div id="medList"></div>
+
+  <!-- Add medicine -->
+  <div class="section-title">➕ 添加药品</div>
+  <div class="add-card">
+    <label>药名（如：降压药）</label>
+    <input type="text" id="newMedName" placeholder="输入药名">
+    <label>剂量（如：1片）</label>
+    <input type="text" id="newMedDose" placeholder="输入剂量">
+    <label>吃药时间（可多选）</label>
+    <div class="time-picker-row" id="timePicker">
+      <div class="time-chip" data-time="早">🌅 早</div>
+      <div class="time-chip" data-time="中">☀️ 中</div>
+      <div class="time-chip" data-time="晚">🌙 晚</div>
+      <div class="time-chip" data-time="睡前">😴 睡前</div>
+    </div>
+    <label>药品图标</label>
+    <div class="time-picker-row" id="iconPicker">
+      <div class="time-chip selected" data-icon="💊">💊</div>
+      <div class="time-chip" data-icon="🩺">🩺</div>
+      <div class="time-chip" data-icon="💉">💉</div>
+      <div class="time-chip" data-icon="🧪">🧪</div>
+      <div class="time-chip" data-icon="🍵">🍵</div>
+    </div>
+    <button class="add-btn" onclick="addMedicine()">➕ 添加药品</button>
+  </div>
+
+  <!-- Reminder -->
+  <div class="section-title">⏰ 提醒设置</div>
+  <div class="reminder-card">
+    <div class="reminder-toggle">
+      <span class="r-label">🔔 吃药提醒</span>
+      <label class="switch"><input type="checkbox" id="reminderToggle" onchange="toggleReminder()"><span class="slider"></span></label>
+    </div>
+    <div id="reminderTimes" style="display:none">
+      <p style="font-size:15px;color:#78716c;margin-bottom:10px">开启后，到吃药时间会弹窗提醒妈妈</p>
+      <div id="reminderList"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="section-title">📅 历史记录</div>
+  <div id="historyList"></div>
+
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const fmtDate=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const todayStr=()=>fmtDate(new Date());
+const todayCN=()=>{const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return`${d.getMonth()+1}月${d.getDate()}日 星期${w}`};
+
+const DB={
+  get(k,def){try{const v=localStorage.getItem('mama_'+k);return v?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){localStorage.setItem('mama_'+k,JSON.stringify(v))}
+};
+
+let selectedTimes=[];
+let selectedIcon='💊';
+
+// Time picker
+$$('#timePicker .time-chip').forEach(c=>c.onclick=()=>{
+  c.classList.toggle('selected');
+  selectedTimes=$$('#timePicker .time-chip.selected').map(x=>x.dataset.time);
+});
+// Icon picker
+$$('#iconPicker .time-chip').forEach(c=>c.onclick=()=>{
+  $$('#iconPicker .time-chip').forEach(x=>x.classList.remove('selected'));
+  c.classList.add('selected');selectedIcon=c.dataset.icon;
+});
+function $$(s){return document.querySelectorAll(s)}
+
+function getMeds(){return DB.get('medicines',[])}
+function getRecords(){return DB.get('records',{})} // {date: {medId: [times]}}
+
+function addMedicine(){
+  const name=$('#newMedName').value.trim();
+  const dose=$('#newMedDose').value.trim();
+  if(!name){alert('请输入药名');return}
+  if(!selectedTimes.length){alert('请选择吃药时间');return}
+  const meds=getMeds();
+  meds.push({id:Date.now(),name,dose:dose||'1片',times:selectedTimes,icon:selectedIcon});
+  DB.set('medicines',meds);
+  $('#newMedName').value='';$('#newMedDose').value='';
+  $$('#timePicker .time-chip').forEach(x=>x.classList.remove('selected'));
+  selectedTimes=[];
+  renderAll();
+}
+
+function delMed(id){
+  if(!confirm('确定删除这个药品吗？'))return;
+  const meds=getMeds().filter(m=>m.id!==id);
+  DB.set('medicines',meds);
+  renderAll();
+}
+
+function toggleTake(medId,time){
+  const date=todayStr();
+  const records=getRecords();
+  if(!records[date])records[date]={};
+  if(!records[date][medId])records[date][medId]=[];
+  const idx=records[date][medId].indexOf(time);
+  if(idx>-1){records[date][medId].splice(idx,1)}
+  else{records[date][medId].push(time)}
+  DB.set('records',records);
+  renderAll();
+}
+
+function filterMeds(){
+  const q=$('#searchInput').value.toLowerCase();
+  $$('#medList .med-card').forEach(card=>{
+    const name=card.dataset.name.toLowerCase();
+    card.style.display=name.includes(q)?'':'none';
+  });
+}
+
+function renderStatus(){
+  const meds=getMeds();
+  const records=getRecords()[todayStr()]||{};
+  let totalSlots=0,takenSlots=0;
+  meds.forEach(m=>{totalSlots+=m.times.length;if(records[m.id])takenSlots+=records[m.id].length});
+  const remain=totalSlots-takenSlots;
+  const card=$('#statusCard');
+  if(!totalSlots){
+    card.className='status-card none';
+    $('#statusEmoji').textContent='📋';
+    $('#statusText').textContent='还没添加药品';
+    $('#statusSub').textContent='在下方添加妈妈要吃的药';
+  }else if(remain===0){
+    card.className='status-card done';
+    $('#statusEmoji').textContent='✅';
+    $('#statusText').textContent='今天的药都吃完啦！';
+    $('#statusSub').textContent='妈妈真棒！记得明天继续哦～';
+  }else if(takenSlots>0){
+    card.className='status-card partial';
+    $('#statusEmoji').textContent='💊';
+    $('#statusText').textContent='已吃'+takenSlots+'次，还剩'+remain+'次';
+    $('#statusSub').textContent='继续加油，记得按时吃药哦～';
+  }else{
+    card.className='status-card none';
+    $('#statusEmoji').textContent='❓';
+    $('#statusText').textContent='今天还没吃药';
+    $('#statusSub').textContent='点击下方按钮记录吃药';
+  }
+  $('#statTotal').textContent=meds.length;
+  $('#statTaken').textContent=takenSlots;
+  $('#statRemain').textContent=remain;
+  // streak
+  let streak=0;const today=new Date(todayStr());
+  for(let i=0;;i++){
+    const d=fmtDate(new Date(today-i*86400000));
+    const r=records_for_date(d);
+    const mds=getMeds();
+    let allDone=mds.length>0&&mds.every(m=>r[m.id]&&r[m.id].length===m.times.length);
+    if(allDone)streak++;else break;
+    if(i>365)break;
+  }
+  $('#statStreak').textContent=streak;
+}
+function records_for_date(d){return getRecords()[d]||{}}
+
+function renderMeds(){
+  const meds=getMeds();
+  const records=getRecords()[todayStr()]||{};
+  if(!meds.length){$('#medList').innerHTML='<div class="empty"><div class="emoji">📋</div>还没有添加药品<br>在下方添加妈妈要吃的药</div>';return}
+  $('#medList').innerHTML=meds.map(m=>{
+    const taken=records[m.id]||[];
+    const allDone=taken.length===m.times.length;
+    return `<div class="med-card ${allDone?'taken':''}" data-name="${m.name}">
+      <div class="med-head">
+        <span class="med-emoji">${m.icon}</span>
+        <div class="med-info">
+          <div class="med-name">${m.name}</div>
+          <div class="med-dose">每次 ${m.dose}</div>
+        </div>
+        <span class="med-count">${taken.length}/${m.times.length}</span>
+      </div>
+      <div class="time-slots">
+        ${m.times.map(t=>{
+          const isTaken=taken.includes(t);
+          return `<div class="time-slot ${isTaken?'taken':''}" onclick="toggleTake(${m.id},'${t}')">
+            <div class="ts-icon">${isTaken?'✅':'⭕'}</div>
+            <div class="ts-label">${t}</div>
+            <div class="ts-status">${isTaken?'已吃':'未吃'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="del-btn" onclick="delMed(${m.id})">🗑️ 删除药品</button>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(){
+  const records=getRecords();
+  const dates=Object.keys(records).sort().reverse().slice(0,10);
+  const meds=getMeds();
+  if(!dates.length){$('#historyList').innerHTML='<div class="empty"><div class="emoji">📅</div>还没有历史记录</div>';return}
+  $('#historyList').innerHTML=dates.map(d=>{
+    const r=records[d];
+    let total=0,taken=0;
+    meds.forEach(m=>{total+=m.times.length;if(r[m.id])taken+=r[m.id].length});
+    let status,cls;
+    if(taken===total&&total>0){status='全部吃完 ✅';cls='full'}
+    else if(taken>0){status=`吃了${taken}/${total}次 ⚠️`;cls='partial'}
+    else{status='没吃 ❌';cls='none'}
+    return `<div class="history-item"><span class="h-date">${d}</span><span class="h-status ${cls}">${status}</span></div>`;
+  }).join('');
+}
+
+function toggleReminder(){
+  const on=$('#reminderToggle').checked;
+  DB.set('reminder',on);
+  $('#reminderTimes').style.display=on?'block':'none';
+  if(on)startReminders();
+}
+
+function startReminders(){
+  const meds=getMeds();
+  const times={早:'08:00',中:'12:00',晚:'18:00',睡前:'21:00'};
+  let html='<p style="font-size:15px;color:#92400e;font-weight:700;margin-bottom:8px">提醒时间：</p>';
+  Object.keys(times).forEach(t=>{
+    const has=meds.some(m=>m.times.includes(t));
+    if(has)html+=`<div style="padding:8px 0;font-size:18px">⏰ ${t} ${times[t]} - 有药要吃</div>`;
+  });
+  $('#reminderList').innerHTML=html;
+}
+
+function checkReminder(){
+  const on=DB.get('reminder',false);
+  if(!on)return;
+  const now=new Date();
+  const h=now.getHours();
+  const m=now.getMinutes();
+  const times=[['早',8,0],['中',12,0],['晚',18,0],['睡前',21,0]];
+  const meds=getMeds();
+  const records=getRecords()[todayStr()]||{};
+  times.forEach(([t,hh,mm])=>{
+    if(h===hh&&m===mm){
+      const need=meds.filter(med=>med.times.includes(t)&&!(records[med.id]||[]).includes(t));
+      if(need.length){
+        alert(`⏰ 提醒：该吃${t}药啦！\n\n需要吃：${need.map(m=>m.name).join('、')}`);
+      }
+    }
+  });
+}
+setInterval(checkReminder,60000);
+
+function renderAll(){
+  renderStatus();renderMeds();renderHistory();
+  if(DB.get('reminder',false)){$('#reminderToggle').checked=true;$('#reminderTimes').style.display='block';startReminders()}
+}
+
+// Init
+$('#todayDay').textContent=todayCN().split(' 星期')[0];
+$('#todayDate').textContent='星期'+todayCN().split(' 星期')[1];
+renderAll();
+checkReminder();
+</script>
+</body>
+</html>
